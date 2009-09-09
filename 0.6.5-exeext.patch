@@ -1,0 +1,31 @@
+This is necessary for dependent packages' makerules:
+
+%.typelib: %.gir $(G_IR_COMPILER)
+	@$(G_IR_COMPILER) ...
+
+--- origsrc/gobject-introspection-0.6.5/gobject-introspection-1.0.pc.in	2009-07-09 12:20:46.000000000 -0500
++++ src/gobject-introspection-0.6.5/gobject-introspection-1.0.pc.in	2009-09-08 18:56:06.529729300 -0500
+@@ -5,8 +5,8 @@ bindir=@bindir@
+ includedir=@includedir@
+ 
+ g_ir_scanner=${bindir}/g-ir-scanner
+-g_ir_compiler=${bindir}/g-ir-compiler
+-g_ir_generate=${bindir}/g-ir-generate
++g_ir_compiler=${bindir}/g-ir-compiler@EXEEXT@
++g_ir_generate=${bindir}/g-ir-generate@EXEEXT@
+ girdir=${prefix}/share/gir-1.0
+ typelibdir=${libdir}/girepository-1.0
+ 
+--- origsrc/gobject-introspection-0.6.5/gobject-introspection-no-export-1.0.pc.in	2009-07-09 12:20:46.000000000 -0500
++++ src/gobject-introspection-0.6.5/gobject-introspection-no-export-1.0.pc.in	2009-09-08 18:56:14.586102400 -0500
+@@ -5,8 +5,8 @@ bindir=@bindir@
+ includedir=@includedir@
+ 
+ g_ir_scanner=${bindir}/g-ir-scanner
+-g_ir_compiler=${bindir}/g-ir-compiler
+-g_ir_generate=${bindir}/g-ir-generate
++g_ir_compiler=${bindir}/g-ir-compiler@EXEEXT@
++g_ir_generate=${bindir}/g-ir-generate@EXEEXT@
+ girdir=${prefix}/share/gir-1.0
+ typelibdir=${libdir}/girepository-1.0
+ 
