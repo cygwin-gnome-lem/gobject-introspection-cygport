@@ -42,9 +42,9 @@ Build instructions:
 This will create:
   /usr/src/gobject-introspection-0.6.5-X-src.tar.bz2
   /usr/src/gobject-introspection-0.6.5-X.tar.bz2
-  /usr/src/gobject-introspection-Everything1.0-0.6.5-X.tar.bz2
-  /usr/src/gobject-introspection-GLib2.0-0.6.5-X.tar.bz2
-  /usr/src/gobject-introspection-x11-0.6.5-X.tar.bz2
+  /usr/src/girepository-Everything1.0-0.6.5-X.tar.bz2
+  /usr/src/girepository-GLib2.0-0.6.5-X.tar.bz2
+  /usr/src/girepository-x11-0.6.5-X.tar.bz2
   /usr/src/libgirepository1.0-devel-0.6.5-X.tar.bz2
   /usr/src/libgirepository1.0_0-0.6.5-X.tar.bz2
 
