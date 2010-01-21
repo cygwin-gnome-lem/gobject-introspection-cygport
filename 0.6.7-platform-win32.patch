@@ -1,5 +1,5 @@
---- origsrc/gobject-introspection-0.6.5/configure.ac	2009-09-04 16:03:33.000000000 -0500
-+++ src/gobject-introspection-0.6.5/configure.ac	2009-09-07 18:58:40.372987600 -0500
+--- origsrc/gobject-introspection-0.6.7/configure.ac	2009-12-10 13:21:02.000000000 -0600
++++ src/gobject-introspection-0.6.7/configure.ac	2010-01-21 03:44:53.766842400 -0600
 @@ -23,14 +23,22 @@ AC_CONFIG_MACRO_DIR([m4])
  AC_CANONICAL_HOST
  AC_MSG_CHECKING([for Win32])
@@ -23,9 +23,9 @@
  AM_CONDITIONAL(OS_WIN32, [test "$os_win32" = "yes"])
  
  # Checks for programs.
---- origsrc/gobject-introspection-0.6.5/gir/Makefile.am	2009-08-27 16:41:10.000000000 -0500
-+++ src/gobject-introspection-0.6.5/gir/Makefile.am	2009-09-07 18:58:40.381737700 -0500
-@@ -179,7 +179,7 @@ libgirepository_everything_1_0_la_CFLAGS
+--- origsrc/gobject-introspection-0.6.7/gir/Makefile.am	2009-12-14 17:00:16.000000000 -0600
++++ src/gobject-introspection-0.6.7/gir/Makefile.am	2010-01-21 03:44:53.773842800 -0600
+@@ -161,7 +161,7 @@ libgirepository_everything_1_0_la_CFLAGS
  libgirepository_everything_1_0_la_LDFLAGS = -version-info $(LT_VERSION)
  libgirepository_everything_1_0_la_LIBADD = $(GOBJECT_LIBS)
  
@@ -34,8 +34,8 @@
  libgirepository_everything_1_0_la_LDFLAGS += -no-undefined
  endif
  
---- origsrc/gobject-introspection-0.6.5/giscanner/Makefile.am	2009-08-16 23:19:08.000000000 -0500
-+++ src/gobject-introspection-0.6.5/giscanner/Makefile.am	2009-09-07 18:58:40.389237800 -0500
+--- origsrc/gobject-introspection-0.6.7/giscanner/Makefile.am	2009-09-19 12:27:48.000000000 -0500
++++ src/gobject-introspection-0.6.7/giscanner/Makefile.am	2010-01-21 03:44:53.778843100 -0600
 @@ -67,6 +67,10 @@ if OS_WIN32
  # Yuck. Probably there is a way to get this from Python, but I don't
  # know how. Use -Wl to avoid libtool crack.
@@ -47,8 +47,8 @@
  endif
  
  _giscanner_la_SOURCES = giscannermodule.c
---- origsrc/gobject-introspection-0.6.5/tests/invoke/Makefile.am	2009-08-24 13:14:53.000000000 -0500
-+++ src/gobject-introspection-0.6.5/tests/invoke/Makefile.am	2009-09-07 18:58:40.402988000 -0500
+--- origsrc/gobject-introspection-0.6.7/tests/invoke/Makefile.am	2009-09-19 12:27:48.000000000 -0500
++++ src/gobject-introspection-0.6.7/tests/invoke/Makefile.am	2010-01-21 03:44:53.783843400 -0600
 @@ -12,7 +12,7 @@ testfns_la_CFLAGS = $(GIREPO_CFLAGS) -I$
  testfns_la_LDFLAGS = -module -avoid-version
  testfns_la_LIBADD = $(top_builddir)/girepository/libgirepository-1.0.la $(GIREPO_LIBS)
@@ -58,9 +58,9 @@
  testfns_la_LDFLAGS += -no-undefined
  endif
  
---- origsrc/gobject-introspection-0.6.5/tests/scanner/Makefile.am	2009-08-24 13:14:53.000000000 -0500
-+++ src/gobject-introspection-0.6.5/tests/scanner/Makefile.am	2009-09-07 18:58:40.407988100 -0500
-@@ -22,8 +22,9 @@ libfoo_la_SOURCES = $(srcdir)/foo.c $(sr
+--- origsrc/gobject-introspection-0.6.7/tests/scanner/Makefile.am	2009-12-14 17:00:16.000000000 -0600
++++ src/gobject-introspection-0.6.7/tests/scanner/Makefile.am	2010-01-21 03:44:53.790843800 -0600
+@@ -23,8 +23,9 @@ libfoo_la_SOURCES = $(srcdir)/foo.c $(sr
  libutility_la_SOURCES = $(srcdir)/utility.c $(srcdir)/utility.h
  libgtkfrob_la_SOURCES = $(srcdir)/gtkfrob.c $(srcdir)/gtkfrob.h
  
@@ -71,12 +71,15 @@
  endif
  
  # .gir --[scanner]-> .typelib --[generate]-> .tgir
-@@ -109,7 +110,7 @@ noinst_PROGRAMS = barapp
- barapp_SOURCES = $(srcdir)/barapp.c $(srcdir)/barapp.h
+@@ -84,10 +85,10 @@
  barapp_LDADD = $(top_builddir)/girepository/libgirepository-1.0.la
  barapp_LDFLAGS = -export-dynamic
--BarApp-1.0.gir: barapp $(SCANNER_BIN) $(SCANNER_LIBS) Makefile
-+BarApp-1.0.gir: barapp$(EXEEXT) $(SCANNER_BIN) $(SCANNER_LIBS) Makefile
- 	$(SCANNER) \
- 	--include=GObject-2.0 \
-         --libtool="$(LIBTOOL)" \
+ 
+-BarApp-1.0.gir: barapp
++BarApp-1.0.gir: barapp$(EXEEXT)
+ BarApp_1_0_gir_PACKAGES = gobject-2.0
+-BarApp_1_0_gir_PROGRAM = ./barapp
++BarApp_1_0_gir_PROGRAM = ./barapp$(EXEEXT)
+ BarApp_1_0_gir_INCLUDES = GObject-2.0
+ BarApp_1_0_gir_FILES = $(barapp_SOURCES)
+ BarApp_1_0_gir_SCANNERFLAGS = --strip-prefix=Bar

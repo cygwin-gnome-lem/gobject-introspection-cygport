@@ -1,0 +1,26 @@
+--- origsrc/gobject-introspection-0.6.7/gobject-introspection-1.0.pc.in	2009-12-14 13:38:42.000000000 -0600
++++ src/gobject-introspection-0.6.7/gobject-introspection-1.0.pc.in	2010-01-21 03:41:28.810119600 -0600
+@@ -7,8 +7,8 @@ datadir=@datadir@
+ includedir=@includedir@
+ 
+ g_ir_scanner=${bindir}/g-ir-scanner
+-g_ir_compiler=${bindir}/g-ir-compiler
+-g_ir_generate=${bindir}/g-ir-generate
++g_ir_compiler=${bindir}/g-ir-compiler@EXEEXT@
++g_ir_generate=${bindir}/g-ir-generate@EXEEXT@
+ girdir=${datadir}/gir-1.0
+ typelibdir=${libdir}/girepository-1.0
+ 
+--- origsrc/gobject-introspection-0.6.7/gobject-introspection-no-export-1.0.pc.in	2009-12-04 09:14:46.000000000 -0600
++++ src/gobject-introspection-0.6.7/gobject-introspection-no-export-1.0.pc.in	2010-01-21 03:41:39.058705800 -0600
+@@ -7,8 +7,8 @@ datadir=@datadir@
+ includedir=@includedir@
+ 
+ g_ir_scanner=${bindir}/g-ir-scanner
+-g_ir_compiler=${bindir}/g-ir-compiler
+-g_ir_generate=${bindir}/g-ir-generate
++g_ir_compiler=${bindir}/g-ir-compiler@EXEEXT@
++g_ir_generate=${bindir}/g-ir-generate@EXEEXT@
+ girdir=${datadir}/gir-1.0
+ typelibdir=${libdir}/girepository-1.0
+ 

@@ -1,6 +1,6 @@
---- origsrc/gobject-introspection-0.6.5/girepository/gtypelib.c	2009-08-20 16:10:51.000000000 -0500
-+++ src/gobject-introspection-0.6.5/girepository/gtypelib.c	2009-09-07 21:11:57.849689300 -0500
-@@ -1997,7 +1997,10 @@ _g_typelib_do_dlopen (GTypelib *typelib)
+--- origsrc/gobject-introspection-0.6.7/girepository/gtypelib.c	2009-12-15 07:06:50.000000000 -0600
++++ src/gobject-introspection-0.6.7/girepository/gtypelib.c	2010-01-21 03:39:56.638847700 -0600
+@@ -2011,7 +2011,10 @@ _g_typelib_do_dlopen (GTypelib *typelib)
                module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                if (module == NULL)
                  {
@@ -12,25 +12,27 @@
                    module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                  }
  
---- origsrc/gobject-introspection-0.6.5/giscanner/dumper.py	2009-09-01 09:55:57.000000000 -0500
-+++ src/gobject-introspection-0.6.5/giscanner/dumper.py	2009-09-07 18:58:40.395487900 -0500
-@@ -174,12 +174,14 @@ class DumpCompiler(object):
+--- origsrc/gobject-introspection-0.6.7/giscanner/dumper.py	2009-12-02 13:00:03.000000000 -0600
++++ src/gobject-introspection-0.6.7/giscanner/dumper.py	2010-01-21 03:39:30.055327200 -0600
+@@ -178,13 +178,16 @@ class DumpCompiler(object):
              args.append('--tag=CC')
              args.append('--silent')
  
 -        args.extend([self._linker_cmd, '-o', output])
 +        args.extend([self._linker_cmd, '-o', output + '.exe'])
-+        args.extend(list(sources))
  
+         cflags = os.environ.get('CFLAGS')
+         if (cflags):
+             for iflag in cflags.split():
+                 args.append(iflag)
+ 
++        args.extend(list(sources))
++        args.append('-Wl,--export-all-symbols')
++
          # Make sure to list the library to be introspected first since it's
          # likely to be uninstalled yet and we want the uninstalled RPATHs have
          # priority (or we might run with installed library that is older)
- 
-+        args.append('-Wl,--export-all-symbols')
-         # Search the current directory first
-         args.append('-L.')
- 
-@@ -207,7 +209,6 @@ class DumpCompiler(object):
+@@ -216,7 +219,6 @@ class DumpCompiler(object):
              if not os.path.exists(source):
                  raise CompilerError(
                      "Could not find object file: %s" % (source, ))
@@ -38,8 +40,8 @@
  
          subprocess.check_call(args)
  
---- origsrc/gobject-introspection-0.6.5/giscanner/libtoolimporter.py	2009-07-09 12:20:46.000000000 -0500
-+++ src/gobject-introspection-0.6.5/giscanner/libtoolimporter.py	2009-09-07 18:58:40.399238000 -0500
+--- origsrc/gobject-introspection-0.6.7/giscanner/libtoolimporter.py	2009-03-03 13:58:56.000000000 -0600
++++ src/gobject-introspection-0.6.7/giscanner/libtoolimporter.py	2010-01-21 03:39:56.643848000 -0600
 @@ -50,7 +50,7 @@ class LibtoolImporter(object):
      def load_module(self, name):
          realpath = extract_libtool(self.path)
@@ -49,8 +51,8 @@
          mod.__loader__ = self
          return mod
  
---- origsrc/gobject-introspection-0.6.5/giscanner/shlibs.py	2009-08-16 23:22:01.000000000 -0500
-+++ src/gobject-introspection-0.6.5/giscanner/shlibs.py	2009-09-07 22:39:31.767220700 -0500
+--- origsrc/gobject-introspection-0.6.7/giscanner/shlibs.py	2009-09-19 12:27:48.000000000 -0500
++++ src/gobject-introspection-0.6.7/giscanner/shlibs.py	2010-01-21 03:39:56.648848300 -0600
 @@ -46,7 +46,7 @@ def _resolve_libtool(options, binary, li
  # is crazy enough to name a library liblib<foo> when lib<foo> exists.
  #
@@ -60,8 +62,8 @@
                        % re.escape(library_name))
  
  # This is a what we do for non-la files. We assume that we are on an
---- origsrc/gobject-introspection-0.6.5/giscanner/utils.py	2009-08-17 06:24:08.000000000 -0500
-+++ src/gobject-introspection-0.6.5/giscanner/utils.py	2009-09-07 22:30:45.525429900 -0500
+--- origsrc/gobject-introspection-0.6.7/giscanner/utils.py	2009-09-19 12:27:48.000000000 -0500
++++ src/gobject-introspection-0.6.7/giscanner/utils.py	2010-01-21 03:39:56.653848500 -0600
 @@ -45,7 +45,7 @@ def to_underscores_noprefix(name):
      name = _upperstr_pat2.sub(r'\1_\2', name)
      return name
