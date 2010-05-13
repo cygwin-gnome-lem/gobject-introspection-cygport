@@ -1,8 +1,11 @@
 inherit gnome2
 
-PATCH_URI="0.6.7-cygwin-dll.patch
-           0.6.7-exeext.patch
-           0.6.7-platform-win32.patch"
+PATCH_URI="
+	0.6.7-cygwin-dll.patch
+	0.6.7-exeext.patch
+	0.6.10-platform-win32.patch
+	0.6.10-tests-expected.patch
+"
 
 PKG_NAMES="${PN} libgirepository1.0_0 libgirepository1.0-devel"
 gobject_introspection_CONTENTS="--exclude=gir-1.0 --exclude=gtk-doc
@@ -11,10 +14,13 @@ libgirepository1_0_0_CONTENTS="usr/bin/cyggirepository-1.0-0.dll"
 libgirepository1_0_devel_CONTENTS="usr/include/ usr/lib/libgirepository-1.0.*
                                    usr/lib/pkgconfig/ usr/share/gtk-doc/"
 
-PKG_NAMES+=" girepository-Everything1.0 girepository-GLib2.0 girepository-x11"
+PKG_NAMES+=" girepository-Everything1.0 girepository-GIMarshallingTests1.0
+             girepository-GLib2.0 girepository-x11"
 girepository_Everything1_0_CONTENTS="usr/*/*-everything-* usr/*/gir*/Everything-1.0.*"
+girepository_GIMarshallingTests1_0_CONTENTS="usr/*/*-gimarshallingtests-* usr/*/gir*/GIMarshallingTests-1.0.*"
 girepository_GLib2_0_CONTENTS="--exclude=GL-* usr/*/gir*/G*-2.0.*"
-girepository_x11_CONTENTS="--exclude=Everything* --exclude=G*-2.0.* usr/*/gir*/"
+girepository_x11_CONTENTS="--exclude=Everything* --exclude=GIMarshallingTests*
+                           --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
-DISTCLEANFILES="gir/G*-2.0.gir gir/Everything-1.0.gir"
+DISTCLEANFILES="gir/G*-2.0.gir gir/Everything-1.0.gir giscanner/config.py"

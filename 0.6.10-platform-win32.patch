@@ -1,0 +1,107 @@
+--- origsrc/gobject-introspection-0.6.10/configure.ac	2010-05-13 00:21:51.621474100 -0500
++++ src/gobject-introspection-0.6.10/configure.ac	2010-05-12 05:20:22.810138100 -0500
+@@ -23,14 +23,22 @@ AC_CONFIG_MACRO_DIR([m4])
+ AC_CANONICAL_HOST
+ AC_MSG_CHECKING([for Win32])
+ case "$host" in
++*-*-cygwin*)
++	platform_win32=yes
++	os_win32=no
++	;;
+ *-*-mingw*)
++	platform_win32=yes
+ 	os_win32=yes
+ 	;;
+ *)
++	platform_win32=no
+ 	os_win32=no
+ 	;;
+ esac
++
+ AC_MSG_RESULT([$os_win32])
++AM_CONDITIONAL(PLATFORM_WIN32, [test "$platform_win32" = "yes"])
+ AM_CONDITIONAL(OS_WIN32, [test "$os_win32" = "yes"])
+ 
+ # Checks for programs.
+--- origsrc/gobject-introspection-0.6.10/gir/Makefile.am	2010-05-13 00:21:51.662476400 -0500
++++ src/gobject-introspection-0.6.10/gir/Makefile.am	2010-05-13 00:18:04.878505100 -0500
+@@ -163,7 +163,7 @@ libgirepository_everything_1_0_la_CFLAGS
+ libgirepository_everything_1_0_la_LDFLAGS = -version-info $(LT_VERSION)
+ libgirepository_everything_1_0_la_LIBADD = $(GOBJECT_LIBS) -lcairo
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ libgirepository_everything_1_0_la_LDFLAGS += -no-undefined
+ endif
+ 
+@@ -185,7 +185,7 @@ libgirepository_gimarshallingtests_1_0_l
+ libgirepository_gimarshallingtests_1_0_la_LDFLAGS = -version-info $(LT_VERSION)
+ libgirepository_gimarshallingtests_1_0_la_LIBADD = $(GOBJECT_LIBS)
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ libgirepository_gimarshallingtests_1_0_la_LDFLAGS += -no-undefined
+ endif
+ 
+--- origsrc/gobject-introspection-0.6.10/giscanner/Makefile.am	2010-05-13 00:21:51.680477400 -0500
++++ src/gobject-introspection-0.6.10/giscanner/Makefile.am	2010-05-12 05:20:22.000000000 -0500
+@@ -67,6 +67,10 @@ if OS_WIN32
+ # Yuck. Probably there is a way to get this from Python, but I don't
+ # know how. Use -Wl to avoid libtool crack.
+ _giscanner_la_LDFLAGS += -Wl,$(pyexecdir)/../../libs/libpython25.a -no-undefined
++else
++if PLATFORM_WIN32
++_giscanner_la_LDFLAGS += -L$(libdir)/python$(PYTHON_VERSION)/config -lpython$(PYTHON_VERSION) -no-undefined
++endif
+ endif
+ 
+ _giscanner_la_SOURCES = giscannermodule.c
+--- origsrc/gobject-introspection-0.6.10/tests/invoke/Makefile.am	2010-05-13 00:21:51.695478300 -0500
++++ src/gobject-introspection-0.6.10/tests/invoke/Makefile.am	2010-05-12 05:20:22.000000000 -0500
+@@ -13,7 +13,7 @@ testfns_la_CFLAGS = $(GIREPO_CFLAGS) -I$
+ testfns_la_LDFLAGS = -module -avoid-version
+ testfns_la_LIBADD = $(top_builddir)/girepository/libgirepository-1.0.la $(GIREPO_LIBS)
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ testfns_la_LDFLAGS += -no-undefined
+ endif
+ 
+--- origsrc/gobject-introspection-0.6.10/tests/offsets/Makefile.am	2010-01-05 09:48:47.000000000 -0600
++++ src/gobject-introspection-0.6.10/tests/offsets/Makefile.am	2010-05-13 00:32:35.284289500 -0500
+@@ -20,6 +20,10 @@ liboffsets_la_CPPFLAGS = $(GIREPO_CFLAGS
+ # dummy rpath to get built dynamically (huh?)
+ liboffsets_la_LDFLAGS = -avoid-version -rpath $(libdir)
+ 
++if PLATFORM_WIN32
++liboffsets_la_LDFLAGS += -no-undefined
++endif
++
+ offsets-1.0.gir: liboffsets.la offsets.h
+ offsets_1_0_gir_INCLUDES = GObject-2.0
+ offsets_1_0_gir_LIBS = liboffsets.la
+--- origsrc/gobject-introspection-0.6.10/tests/scanner/Makefile.am	2010-05-13 00:21:51.710479200 -0500
++++ src/gobject-introspection-0.6.10/tests/scanner/Makefile.am	2010-05-12 05:20:22.000000000 -0500
+@@ -23,8 +23,9 @@ libfoo_la_SOURCES = $(srcdir)/foo.c $(sr
+ libutility_la_SOURCES = $(srcdir)/utility.c $(srcdir)/utility.h
+ libgtkfrob_la_SOURCES = $(srcdir)/gtkfrob.c $(srcdir)/gtkfrob.h
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ AM_LDFLAGS += -no-undefined
++libfoo_la_LIBADD = $(top_builddir)/girepository/libgirepository-1.0.la
+ endif
+ 
+ # .gir --[scanner]-> .typelib --[generate]-> .tgir
+@@ -84,9 +85,9 @@ barapp_SOURCES = $(srcdir)/barapp.c $(sr
+ barapp_LDADD = $(top_builddir)/girepository/libgirepository-1.0.la
+ barapp_LDFLAGS = -export-dynamic
+ 
+-BarApp-1.0.gir: barapp
++BarApp-1.0.gir: barapp$(EXEEXT)
+ BarApp_1_0_gir_PACKAGES = gobject-2.0
+-BarApp_1_0_gir_PROGRAM = ./barapp
++BarApp_1_0_gir_PROGRAM = ./barapp$(EXEEXT)
+ BarApp_1_0_gir_INCLUDES = GObject-2.0
+ BarApp_1_0_gir_FILES = $(barapp_SOURCES)
+ BarApp_1_0_gir_SCANNERFLAGS = --strip-prefix=Bar
