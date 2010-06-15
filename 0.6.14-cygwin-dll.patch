@@ -1,5 +1,5 @@
---- origsrc/gobject-introspection-0.6.7/girepository/gtypelib.c	2009-12-15 07:06:50.000000000 -0600
-+++ src/gobject-introspection-0.6.7/girepository/gtypelib.c	2010-01-21 03:39:56.638847700 -0600
+--- origsrc/gobject-introspection-0.6.7/girepository/gitypelib.c
++++ src/gobject-introspection-0.6.7/girepository/gitypelib.c
 @@ -2011,7 +2011,10 @@ _g_typelib_do_dlopen (GTypelib *typelib)
                module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                if (module == NULL)
