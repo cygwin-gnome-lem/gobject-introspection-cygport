@@ -1,5 +1,5 @@
 category: Gnome
-requires: girepository-GLib2.0 libffi4 libgcc1 libgirepository1.0_0 libgirepository1.0-devel libglib2.0_0 python
+requires: girepository-GLib2.0 libffi4 libgcc1 libgirepository1.0_1 libgirepository1.0-devel libglib2.0_0 python
 sdesc: "GObject Introspection tools"
 ldesc: "The goal of the project is to describe GObject APIs and collect 
 them in a uniform, machine readable format."

@@ -1,6 +1,6 @@
---- origsrc/gobject-introspection-0.9.5/giscanner/Makefile.am	2010-09-10 08:20:57.000000000 -0500
-+++ src/gobject-introspection-0.9.5/giscanner/Makefile.am	2010-09-13 05:21:24.395091600 -0500
-@@ -68,6 +68,8 @@ if OS_WIN32
+--- origsrc/gobject-introspection-0.9.12/giscanner/Makefile.am	2010-09-28 09:34:09.000000000 -0500
++++ src/gobject-introspection-0.9.12/giscanner/Makefile.am	2010-11-04 16:09:25.210800100 -0500
+@@ -69,6 +69,8 @@ if OS_WIN32
  # Yuck. Probably there is a way to get this from Python, but I don't
  # know how. Use -Wl to avoid libtool crack.
  _giscanner_la_LDFLAGS += -Wl,$(pyexecdir)/../../libs/libpython25.a -no-undefined
@@ -9,16 +9,17 @@
  endif
  
  _giscanner_la_SOURCES = giscannermodule.c
---- origsrc/gobject-introspection-0.9.5/tests/Makefile.am	2010-09-10 08:20:57.000000000 -0500
-+++ src/gobject-introspection-0.9.5/tests/Makefile.am	2010-09-13 06:26:55.984247700 -0500
-@@ -7,14 +7,18 @@ BUILT_SOURCES=
+--- origsrc/gobject-introspection-0.9.12/tests/Makefile.am	2010-10-01 08:34:38.000000000 -0500
++++ src/gobject-introspection-0.9.12/tests/Makefile.am	2010-11-04 16:10:21.680029900 -0500
+@@ -7,7 +7,6 @@ BUILT_SOURCES=
  CLEANFILES=
  
  INCLUDES = $(GOBJECT_CFLAGS)
 -LIBADD = $(GOBJECT_LIBS)
  
- testlib_LTLIBRARIES = libeverything-1.0.la libgimarshallingtests-1.0.la
- testlibdir=$(prefix)/unused
+ testsdir = $(datadir)/gobject-introspection-1.0/tests
+ tests_DATA =		    \
+@@ -21,7 +20,12 @@ testlibdir=$(prefix)/unused
  install-testlibLTLIBRARIES: # prevent it from being installed
  
  libeverything_1_0_la_SOURCES = everything.c
@@ -31,8 +32,8 @@
  
  EXTRA_DIST += gimarshallingtests.h
  
---- origsrc/gobject-introspection-0.9.5/tests/offsets/Makefile.am	2010-09-10 08:20:57.000000000 -0500
-+++ src/gobject-introspection-0.9.5/tests/offsets/Makefile.am	2010-09-13 05:21:32.141534600 -0500
+--- origsrc/gobject-introspection-0.9.12/tests/offsets/Makefile.am	2010-09-14 07:03:37.000000000 -0500
++++ src/gobject-introspection-0.9.12/tests/offsets/Makefile.am	2010-11-04 16:10:32.364641100 -0500
 @@ -18,7 +18,7 @@ liboffsets_la_SOURCES = \
  	offsets.c
  liboffsets_la_CPPFLAGS = $(GIREPO_CFLAGS)
@@ -42,9 +43,9 @@
  
  Offsets-1.0.gir: liboffsets.la offsets.h
  Offsets_1_0_gir_INCLUDES = GObject-2.0
---- origsrc/gobject-introspection-0.9.5/tests/scanner/Makefile.am	2010-09-10 09:49:36.000000000 -0500
-+++ src/gobject-introspection-0.9.5/tests/scanner/Makefile.am	2010-09-13 05:22:42.819973800 -0500
-@@ -17,7 +17,7 @@ install-testlibLTLIBRARIES: # prevent it
+--- origsrc/gobject-introspection-0.9.12/tests/scanner/Makefile.am	2010-09-16 10:01:34.000000000 -0500
++++ src/gobject-introspection-0.9.12/tests/scanner/Makefile.am	2010-11-04 16:11:17.006194400 -0500
+@@ -20,7 +20,7 @@ install-testlibLTLIBRARIES: # prevent it
  
  AM_CPPFLAGS = -I$(top_srcdir)/girepository
  AM_CFLAGS = $(GIO_CFLAGS) $(GOBJECT_CFLAGS) $(GTHREAD_CFLAGS)
@@ -53,7 +54,7 @@
  LIBS = $(GOBJECT_LIBS) $(GTHREAD_LIBS)
  
  libannotation_la_SOURCES = $(srcdir)/annotation.c $(srcdir)/annotation.h
-@@ -37,10 +37,6 @@ libregress_la_CFLAGS = $(AM_CFLAGS) $(CA
+@@ -38,10 +38,6 @@ libregress_la_CFLAGS = $(AM_CFLAGS) $(CA
  libregress_la_LDFLAGS = $(AM_LDFLAGS) $(CAIRO_LIBS) 
  
  
@@ -64,7 +65,7 @@
  # .gir --[scanner]-> .typelib
  GIRS =
  TYPELIBS = $(GIRS:.gir=.typelib)
-@@ -101,9 +97,9 @@ barapp_SOURCES = $(srcdir)/barapp.c $(sr
+@@ -104,9 +100,9 @@ barapp_SOURCES = $(srcdir)/barapp.c $(sr
  barapp_LDADD = $(top_builddir)/girepository/libgirepository-1.0.la
  barapp_LDFLAGS = -export-dynamic
  

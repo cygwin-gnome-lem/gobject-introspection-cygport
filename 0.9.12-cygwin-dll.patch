@@ -1,6 +1,6 @@
---- origsrc/gobject-introspection-0.6.7/girepository/gitypelib.c
-+++ src/gobject-introspection-0.6.7/girepository/gitypelib.c
-@@ -2011,7 +2011,10 @@ _g_typelib_do_dlopen (GTypelib *typelib)
+--- origsrc/gobject-introspection-0.9.12/girepository/gitypelib.c	2010-09-16 10:01:34.000000000 -0500
++++ src/gobject-introspection-0.9.12/girepository/gitypelib.c	2010-11-04 16:12:47.663596400 -0500
+@@ -2024,7 +2024,10 @@ _g_typelib_do_dlopen (GITypelib *typelib
                module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                if (module == NULL)
                  {
@@ -12,17 +12,18 @@
                    module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                  }
  
---- origsrc/gobject-introspection-0.6.7/giscanner/dumper.py	2009-12-02 13:00:03.000000000 -0600
-+++ src/gobject-introspection-0.6.7/giscanner/dumper.py	2010-01-21 03:39:30.055327200 -0600
-@@ -178,13 +178,16 @@ class DumpCompiler(object):
+--- origsrc/gobject-introspection-0.9.12/giscanner/dumper.py	2010-10-04 15:31:35.000000000 -0500
++++ src/gobject-introspection-0.9.12/giscanner/dumper.py	2010-11-04 16:14:06.833734500 -0500
+@@ -191,7 +191,7 @@ class DumpCompiler(object):
              args.append('--tag=CC')
              args.append('--silent')
  
 -        args.extend([self._linker_cmd, '-o', output])
 +        args.extend([self._linker_cmd, '-o', output + '.exe'])
+         if libtool:
+             args.append('-export-dynamic')
  
-         cflags = os.environ.get('CFLAGS')
-         if (cflags):
+@@ -200,6 +200,9 @@ class DumpCompiler(object):
              for iflag in cflags.split():
                  args.append(iflag)
  
@@ -32,28 +33,28 @@
          # Make sure to list the library to be introspected first since it's
          # likely to be uninstalled yet and we want the uninstalled RPATHs have
          # priority (or we might run with installed library that is older)
-@@ -216,7 +219,6 @@ class DumpCompiler(object):
+@@ -225,7 +228,6 @@ class DumpCompiler(object):
              if not os.path.exists(source):
                  raise CompilerError(
                      "Could not find object file: %s" % (source, ))
 -        args.extend(list(sources))
  
-         subprocess.check_call(args)
+         if not self._options.quiet:
+             print "g-ir-scanner: link: %s" % (
+--- origsrc/gobject-introspection-0.9.12/giscanner/libtoolimporter.py	2010-10-06 09:15:41.000000000 -0500
++++ src/gobject-introspection-0.9.12/giscanner/libtoolimporter.py	2010-11-04 16:18:00.943342700 -0500
+@@ -56,6 +56,8 @@ class LibtoolImporter(object):
+             extension = '.dylib'
+         elif platform_system == 'Windows':
+             extension = '.dll'
++        elif sys.platform == 'cygwin':
++            extension = '.dll'
+         else:
+             extension = '.so'
  
---- origsrc/gobject-introspection-0.6.7/giscanner/libtoolimporter.py	2009-03-03 13:58:56.000000000 -0600
-+++ src/gobject-introspection-0.6.7/giscanner/libtoolimporter.py	2010-01-21 03:39:56.643848000 -0600
-@@ -50,7 +50,7 @@ class LibtoolImporter(object):
-     def load_module(self, name):
-         realpath = extract_libtool(self.path)
-         mod = imp.load_module(name, open(realpath), realpath,
--                              ('.so', 'rb', 3))
-+                              ('.dll', 'rb', 3))
-         mod.__loader__ = self
-         return mod
- 
---- origsrc/gobject-introspection-0.6.7/giscanner/shlibs.py	2009-09-19 12:27:48.000000000 -0500
-+++ src/gobject-introspection-0.6.7/giscanner/shlibs.py	2010-01-21 03:39:56.648848300 -0600
-@@ -46,7 +46,7 @@ def _resolve_libtool(options, binary, li
+--- origsrc/gobject-introspection-0.9.12/giscanner/shlibs.py	2010-06-10 12:54:54.000000000 -0500
++++ src/gobject-introspection-0.9.12/giscanner/shlibs.py	2010-11-04 16:19:05.106254500 -0500
+@@ -47,7 +47,7 @@ def _resolve_libtool(options, binary, li
  # is crazy enough to name a library liblib<foo> when lib<foo> exists.
  #
  def _ldd_library_pattern(library_name):
@@ -62,9 +63,9 @@
                        % re.escape(library_name))
  
  # This is a what we do for non-la files. We assume that we are on an
---- origsrc/gobject-introspection-0.6.7/giscanner/utils.py	2009-09-19 12:27:48.000000000 -0500
-+++ src/gobject-introspection-0.6.7/giscanner/utils.py	2010-01-21 03:39:56.653848500 -0600
-@@ -45,7 +45,7 @@ def to_underscores_noprefix(name):
+--- origsrc/gobject-introspection-0.9.12/giscanner/utils.py	2010-09-10 08:20:57.000000000 -0500
++++ src/gobject-introspection-0.9.12/giscanner/utils.py	2010-11-04 16:19:30.487498800 -0500
+@@ -66,7 +66,7 @@ def to_underscores_noprefix(name):
      name = _upperstr_pat2.sub(r'\1_\2', name)
      return name
  

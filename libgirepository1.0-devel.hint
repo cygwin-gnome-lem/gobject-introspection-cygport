@@ -1,5 +1,5 @@
 category: Gnome
-requires: libgirepository1.0_0 libglib2.0-devel
+requires: libgirepository1.0_1 libglib2.0-devel
 external-source: gobject-introspection
 sdesc: "GObject Introspection library (development)"
 ldesc: "The goal of the project is to describe GObject APIs and collect 
