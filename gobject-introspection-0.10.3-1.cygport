@@ -3,9 +3,9 @@ inherit gnome2
 HOMEPAGE="http://live.gnome.org/GObjectIntrospection"
 
 PATCH_URI="
-	0.9.12-cygwin-dll.patch
-	0.9.5-exeext.patch
-	0.9.12-no-undefined.patch
+	0.10.3-cygwin-dll.patch
+	0.10.3-exeext.patch
+	0.10.3-no-undefined.patch
 	0.9.5-tests-expected.patch
 "
 
@@ -14,11 +14,12 @@ gobject_introspection_CONTENTS="--exclude=gir-1.0 --exclude=gtk-doc
                                 usr/bin/g-ir-* usr/lib/${PN}/ usr/share/"
 libgirepository1_0_1_CONTENTS="usr/bin/cyggirepository-1.0-1.dll"
 libgirepository1_0_devel_CONTENTS="usr/include/ usr/lib/libgirepository-1.0.*
-                                   usr/lib/pkgconfig/ usr/share/gtk-doc/"
+                                   usr/lib/pkgconfig/" # usr/share/gtk-doc/"
 
-PKG_NAMES+=" girepository-GLib2.0 girepository-x11"
+PKG_NAMES+=" girepository-cairo1.0 girepository-GLib2.0 girepository-x11"
+girepository_cairo1_0_CONTENTS="usr/*/gir*/cairo-1.0.*"
 girepository_GLib2_0_CONTENTS="--exclude=GL-* usr/*/gir*/G*-2.0.*"
-girepository_x11_CONTENTS="--exclude=G*-2.0.* usr/*/gir*/"
+girepository_x11_CONTENTS="--exclude=cairo-1.0.* --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
-DISTCLEANFILES="gir/G*-2.0.gir"
+DISTCLEANFILES="gir/cairo-1.0.gir gir/G*-2.0.gir"

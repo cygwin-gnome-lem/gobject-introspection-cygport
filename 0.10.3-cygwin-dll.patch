@@ -1,6 +1,20 @@
---- origsrc/gobject-introspection-0.9.12/girepository/gitypelib.c	2010-09-16 10:01:34.000000000 -0500
-+++ src/gobject-introspection-0.9.12/girepository/gitypelib.c	2010-11-04 16:12:47.663596400 -0500
-@@ -2024,7 +2024,10 @@ _g_typelib_do_dlopen (GITypelib *typelib
+--- origsrc/gobject-introspection-0.10.3/gir/cairo-1.0.gir.in	2011-01-20 12:07:19.000000000 -0600
++++ src/gobject-introspection-0.10.3/gir/cairo-1.0.gir.in	2011-03-03 00:21:59.864051800 -0600
+@@ -3,9 +3,9 @@
+             xmlns="http://www.gtk.org/introspection/core/1.0"
+             xmlns:c="http://www.gtk.org/introspection/c/1.0"
+             xmlns:glib="http://www.gtk.org/introspection/glib/1.0">
+-  <package name="@CAIRO_GIR_PACKAGE@"/>
++  <package name="cairo-gobject"/>
+   <namespace name="cairo" version="1.0"
+-	     shared-library="@CAIRO_SHARED_LIBRARY@"
++	     shared-library="cygcairo-gobject-2.dll"
+ 	     c:identifier-prefixes="cairo"
+ 	     c:symbol-prefixes="cairo">
+     <record name="Context" c:type="cairo_t" foreign="1"
+--- origsrc/gobject-introspection-0.10.3/girepository/gitypelib.c	2011-01-27 08:41:23.000000000 -0600
++++ src/gobject-introspection-0.10.3/girepository/gitypelib.c	2011-03-02 20:32:34.754065200 -0600
+@@ -2132,7 +2132,10 @@ _g_typelib_do_dlopen (GITypelib *typelib
                module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                if (module == NULL)
                  {
@@ -12,28 +26,30 @@
                    module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
                  }
  
---- origsrc/gobject-introspection-0.9.12/giscanner/dumper.py	2010-10-04 15:31:35.000000000 -0500
-+++ src/gobject-introspection-0.9.12/giscanner/dumper.py	2010-11-04 16:14:06.833734500 -0500
-@@ -191,7 +191,7 @@ class DumpCompiler(object):
-             args.append('--tag=CC')
+--- origsrc/gobject-introspection-0.10.3/giscanner/dumper.py	2011-01-20 08:33:07.000000000 -0600
++++ src/gobject-introspection-0.10.3/giscanner/dumper.py	2011-03-02 20:30:53.884289300 -0600
+@@ -202,15 +202,19 @@ class DumpCompiler(object):
              args.append('--silent')
  
--        args.extend([self._linker_cmd, '-o', output])
-+        args.extend([self._linker_cmd, '-o', output + '.exe'])
+         args.extend(self._linker_cmd.split())
+-        args.extend(['-o', output])
++        args.extend(['-o', output + '.exe'])
          if libtool:
              args.append('-export-dynamic')
++        else:
++            args.append('-Wl,--export-all-symbols')
  
-@@ -200,6 +200,9 @@ class DumpCompiler(object):
+         cflags = os.environ.get('CFLAGS')
+         if (cflags):
              for iflag in cflags.split():
                  args.append(iflag)
  
 +        args.extend(list(sources))
-+        args.append('-Wl,--export-all-symbols')
 +
          # Make sure to list the library to be introspected first since it's
          # likely to be uninstalled yet and we want the uninstalled RPATHs have
          # priority (or we might run with installed library that is older)
-@@ -225,7 +228,6 @@ class DumpCompiler(object):
+@@ -224,7 +228,6 @@ class DumpCompiler(object):
              if not os.path.exists(source):
                  raise CompilerError(
                      "Could not find object file: %s" % (source, ))
@@ -41,9 +57,9 @@
  
          if not self._options.quiet:
              print "g-ir-scanner: link: %s" % (
---- origsrc/gobject-introspection-0.9.12/giscanner/libtoolimporter.py	2010-10-06 09:15:41.000000000 -0500
-+++ src/gobject-introspection-0.9.12/giscanner/libtoolimporter.py	2010-11-04 16:18:00.943342700 -0500
-@@ -56,6 +56,8 @@ class LibtoolImporter(object):
+--- origsrc/gobject-introspection-0.10.3/giscanner/libtoolimporter.py	2010-11-09 12:57:01.000000000 -0600
++++ src/gobject-introspection-0.10.3/giscanner/libtoolimporter.py	2011-03-02 20:33:14.955335300 -0600
+@@ -60,6 +60,8 @@ class LibtoolImporter(object):
              extension = '.dylib'
          elif platform_system == 'Windows':
              extension = '.dll'
@@ -52,8 +68,8 @@
          else:
              extension = '.so'
  
---- origsrc/gobject-introspection-0.9.12/giscanner/shlibs.py	2010-06-10 12:54:54.000000000 -0500
-+++ src/gobject-introspection-0.9.12/giscanner/shlibs.py	2010-11-04 16:19:05.106254500 -0500
+--- origsrc/gobject-introspection-0.10.3/giscanner/shlibs.py	2010-09-02 08:41:11.000000000 -0500
++++ src/gobject-introspection-0.10.3/giscanner/shlibs.py	2011-03-02 20:34:05.717823800 -0600
 @@ -47,7 +47,7 @@ def _resolve_libtool(options, binary, li
  # is crazy enough to name a library liblib<foo> when lib<foo> exists.
  #
@@ -63,8 +79,8 @@
                        % re.escape(library_name))
  
  # This is a what we do for non-la files. We assume that we are on an
---- origsrc/gobject-introspection-0.9.12/giscanner/utils.py	2010-09-10 08:20:57.000000000 -0500
-+++ src/gobject-introspection-0.9.12/giscanner/utils.py	2010-11-04 16:19:30.487498800 -0500
+--- origsrc/gobject-introspection-0.10.3/giscanner/utils.py	2010-09-10 08:04:23.000000000 -0500
++++ src/gobject-introspection-0.10.3/giscanner/utils.py	2011-03-02 20:34:36.850279600 -0600
 @@ -66,7 +66,7 @@ def to_underscores_noprefix(name):
      name = _upperstr_pat2.sub(r'\1_\2', name)
      return name
