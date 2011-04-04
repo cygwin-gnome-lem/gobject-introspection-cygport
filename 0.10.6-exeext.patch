@@ -1,5 +1,5 @@
---- origsrc/gobject-introspection-0.10.3/Makefile-gir.am	2011-01-20 08:33:07.000000000 -0600
-+++ src/gobject-introspection-0.10.3/Makefile-gir.am	2011-03-02 20:42:35.677514500 -0600
+--- origsrc/gobject-introspection-0.10.6/Makefile-gir.am
++++ src/gobject-introspection-0.10.6/Makefile-gir.am
 @@ -15,17 +15,17 @@ STATIC_GIRSOURCES =               \
  EXTRA_DIST += $(STATIC_GIRSOURCES)
  
@@ -29,6 +29,15 @@
  
  # glib with source (to enable documentation)
  if WITH_GLIBSRC
+@@ -85,7 +85,7 @@ GLib_2_0_gir_FILES =  \
+ 
+ BUILT_GIRSOURCES += GLib-2.0.gir
+ 
+-GLib-2.0.gir: g-ir-scanner g-ir-compiler
++GLib-2.0.gir: g-ir-scanner g-ir-compiler$(EXEEXT)
+ 
+ gir/DBusGLib-1.0.typelib: GObject-2.0.gir
+ 
 --- origsrc/gobject-introspection-0.10.3/common.mk	2010-11-11 08:58:33.000000000 -0600
 +++ src/gobject-introspection-0.10.3/common.mk	2011-03-02 20:22:13.446982100 -0600
 @@ -11,7 +11,7 @@ INTROSPECTION_SCANNER = \

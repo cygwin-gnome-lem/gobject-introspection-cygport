@@ -1,14 +1,11 @@
---- origsrc/gobject-introspection-0.10.3/gir/cairo-1.0.gir.in	2011-01-20 12:07:19.000000000 -0600
-+++ src/gobject-introspection-0.10.3/gir/cairo-1.0.gir.in	2011-03-03 00:21:59.864051800 -0600
-@@ -3,9 +3,9 @@
-             xmlns="http://www.gtk.org/introspection/core/1.0"
-             xmlns:c="http://www.gtk.org/introspection/c/1.0"
+--- origsrc/gobject-introspection-0.10.6/gir/cairo-1.0.gir.in
++++ src/gobject-introspection-0.10.6/gir/cairo-1.0.gir.in
+@@ -5,7 +5,7 @@
              xmlns:glib="http://www.gtk.org/introspection/glib/1.0">
--  <package name="@CAIRO_GIR_PACKAGE@"/>
-+  <package name="cairo-gobject"/>
+   <package name="%CAIRO_GIR_PACKAGE%"/>
    <namespace name="cairo" version="1.0"
--	     shared-library="@CAIRO_SHARED_LIBRARY@"
-+	     shared-library="cygcairo-gobject-2.dll"
+-	     shared-library="%CAIRO_SHARED_LIBRARY%"
++	     shared-library="cyg%CAIRO_GIR_PACKAGE%-2.dll"
  	     c:identifier-prefixes="cairo"
  	     c:symbol-prefixes="cairo">
      <record name="Context" c:type="cairo_t" foreign="1"
