@@ -7,6 +7,7 @@ PATCH_URI="
 	0.10.6-exeext.patch
 	0.10.3-no-undefined.patch
 	0.9.5-tests-expected.patch
+	0.10.7-gtk-doc-117.patch
 "
 
 PKG_NAMES="${PN} libgirepository1.0_1 libgirepository1.0-devel"
@@ -22,4 +23,3 @@ girepository_GLib2_0_CONTENTS="--exclude=GL-* usr/*/gir*/G*-2.0.*"
 girepository_x11_CONTENTS="--exclude=cairo-1.0.* --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
-DISTCLEANFILES="gir/cairo-1.0.gir gir/G*-2.0.gir"
