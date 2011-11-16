@@ -1,0 +1,211 @@
+--- origsrc/gobject-introspection-1.30.0/Makefile-giscanner.am	2011-09-19 12:57:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/Makefile-giscanner.am	2011-11-15 19:38:07.407398000 -0600
+@@ -63,7 +63,7 @@ _giscanner_la_LIBADD = libgiscanner.la $
+ _giscanner_la_LDFLAGS = \
+ 	-module -avoid-version -export-symbols-regex init_giscanner
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ # Windows requires Python extension modules to be explicitly
+ # linked to libpython. Extension modules are shared libaries
+ # (.dll files), but need to be called .pyd for Python to load
+@@ -72,8 +72,12 @@ _giscanner_la_LIBADD += \
+ 	$(PYTHON_LIBS)
+ 
+ _giscanner_la_LDFLAGS += \
+-	-no-undefined \
++	-no-undefined
++endif
++if OS_WIN32
++_giscanner_la_LDFLAGS += \
+ 	-shrext ".pyd"
+ endif
+ 
++
+ _giscanner_la_SOURCES = giscanner/giscannermodule.c
+--- origsrc/gobject-introspection-1.30.0/configure.ac	2011-09-20 16:00:27.000000000 -0500
++++ src/gobject-introspection-1.30.0/configure.ac	2011-11-15 19:54:11.314867000 -0600
+@@ -25,13 +25,20 @@ AM_SILENT_RULES([yes])
+ # Check for Win32
+ AC_CANONICAL_HOST
+ case "$host" in
++*-*-cygwin*)
++	platform_win32=yes
++	os_win32=no
++	;;
+ *-*-mingw*)
++	platform_win32=yes
+ 	os_win32=yes
+ 	;;
+ *)
++	platform_win32=no
+ 	os_win32=no
+ 	;;
+ esac
++AM_CONDITIONAL(PLATFORM_WIN32, [test "x$platform_win32" = "xyes"])
+ AM_CONDITIONAL(OS_WIN32, [test "x$os_win32" = "xyes"])
+ 
+ # Checks for programs.
+@@ -143,6 +150,9 @@ fi
+ 
+ if test x$have_cairo_gobject = xyes; then
+   case "$host" in
++    *-*-cygwin*)
++      CAIRO_SHARED_LIBRARY="cygcairo-gobject-2.dll"
++      ;;
+     *-*-darwin*)
+       CAIRO_SHARED_LIBRARY="libcairo-gobject.2.dylib"
+       ;;
+@@ -156,6 +166,9 @@ if test x$have_cairo_gobject = xyes; the
+   CAIRO_GIR_PACKAGE="cairo-gobject"
+ elif test x$have_cairo = xyes; then
+   case "$host" in
++    *-*-cygwin*)
++      CAIRO_SHARED_LIBRARY="cygcairo-2.dll"
++      ;;
+     *-*-darwin*)
+       CAIRO_SHARED_LIBRARY="libcairo.2.dylib"
+       ;;
+@@ -261,7 +274,7 @@ case "$host" in
+ 	;;
+ esac
+ AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
+-if test "x$os_win32" = "xyes"; then
++if test "x$platform_win32" = "xyes"; then
+   AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
+ fi
+ 
+--- origsrc/gobject-introspection-1.30.0/girepository/gitypelib.c	2011-08-29 20:07:30.000000000 -0500
++++ src/gobject-introspection-1.30.0/girepository/gitypelib.c	2011-11-15 19:42:33.767765600 -0600
+@@ -2128,7 +2128,10 @@ _g_typelib_do_dlopen (GITypelib *typelib
+               module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
+               if (module == NULL)
+                 {
+-                  g_string_overwrite (shlib_full, strlen (shlib_full->str)-2, SHLIB_SUFFIX);
++                  g_string_overwrite (shlib_full, strlen (shlib_full->str)-strlen (SHLIB_SUFFIX), SHLIB_SUFFIX);
++#ifdef G_WITH_CYGWIN
++                  g_string_overwrite (shlib_full, 0, "cyg");
++#endif
+                   module = g_module_open (shlib_full->str, G_MODULE_BIND_LAZY);
+                 }
+ 
+--- origsrc/gobject-introspection-1.30.0/giscanner/dumper.py	2011-09-20 14:31:44.000000000 -0500
++++ src/gobject-introspection-1.30.0/giscanner/dumper.py	2011-11-15 19:45:28.428006600 -0600
+@@ -223,10 +223,10 @@ class DumpCompiler(object):
+                 args.append('--silent')
+ 
+         args.extend(self._linker_cmd.split())
+-        args.extend(['-o', output])
++        args.extend(['-o', output + '.exe'])
+         if libtool:
+-            if os.name == 'nt':
+-                args.append('-export-all-symbols')
++            if os.name == 'nt' or sys.platform == 'cygwin':
++                args.append('-Wl,--export-all-symbols')
+             else:
+                 args.append('-export-dynamic')
+ 
+@@ -235,6 +235,12 @@ class DumpCompiler(object):
+             for iflag in cflags.split():
+                 args.append(iflag)
+ 
++        for source in sources:
++            if not os.path.exists(source):
++                raise CompilerError(
++                    "Could not find object file: %s" % (source, ))
++        args.extend(list(sources))
++
+         # Make sure to list the library to be introspected first since it's
+         # likely to be uninstalled yet and we want the uninstalled RPATHs have
+         # priority (or we might run with installed library that is older)
+@@ -244,12 +250,6 @@ class DumpCompiler(object):
+         else:
+             self._add_link_external_args(args)
+ 
+-        for source in sources:
+-            if not os.path.exists(source):
+-                raise CompilerError(
+-                    "Could not find object file: %s" % (source, ))
+-        args.extend(list(sources))
+-
+         if not self._options.quiet:
+             print "g-ir-scanner: link: %s" % (
+                 subprocess.list2cmdline(args), )
+--- origsrc/gobject-introspection-1.30.0/giscanner/libtoolimporter.py	2011-06-10 10:36:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/giscanner/libtoolimporter.py	2011-11-15 19:46:12.058066900 -0600
+@@ -58,7 +58,7 @@ class LibtoolImporter(object):
+ 
+         if platform_system == 'Darwin':
+             extension = '.dylib'
+-        elif platform_system == 'Windows':
++        elif platform_system == 'Windows' or sys.platform == 'cygwin':
+             extension = '.dll'
+         else:
+             extension = '.so'
+--- origsrc/gobject-introspection-1.30.0/giscanner/shlibs.py	2011-06-10 10:36:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/giscanner/shlibs.py	2011-11-15 19:46:55.458126700 -0600
+@@ -47,7 +47,7 @@ def _resolve_libtool(options, binary, li
+ # is crazy enough to name a library liblib<foo> when lib<foo> exists.
+ #
+ def _ldd_library_pattern(library_name):
+-    return re.compile("(?<![A-Za-z0-9_-])(lib*%s[^A-Za-z0-9_-][^\s\(\)]*)"
++    return re.compile("(cyg%s-*[0-9]*\.dll)"
+                       % re.escape(library_name))
+ 
+ # This is a what we do for non-la files. We assume that we are on an
+--- origsrc/gobject-introspection-1.30.0/giscanner/utils.py	2011-06-10 10:36:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/giscanner/utils.py	2011-11-15 19:47:18.438158500 -0600
+@@ -66,7 +66,7 @@ def to_underscores_noprefix(name):
+     name = _upperstr_pat2.sub(r'\1_\2', name)
+     return name
+ 
+-_libtool_pat = re.compile("dlname='([A-z0-9\.\-\+]+)'\n")
++_libtool_pat = re.compile("dlname='([A-z0-9/\.\-\+]+)'\n")
+ 
+ def _extract_dlname_field(la_file):
+     f = open(la_file)
+--- origsrc/gobject-introspection-1.30.0/tests/Makefile.am	2011-08-29 20:07:30.000000000 -0500
++++ src/gobject-introspection-1.30.0/tests/Makefile.am	2011-11-15 19:39:00.617471500 -0600
+@@ -7,7 +7,6 @@ BUILT_SOURCES=
+ CLEANFILES=
+ 
+ INCLUDES = $(GOBJECT_CFLAGS)
+-LIBADD = $(GOBJECT_LIBS)
+ 
+ testsdir = $(datadir)/gobject-introspection-1.0/tests
+ tests_DATA =		    \
+@@ -19,7 +18,12 @@ tests_DATA =		    \
+ check_LTLIBRARIES = libeverything-1.0.la libgimarshallingtests-1.0.la
+ 
+ libeverything_1_0_la_SOURCES = everything.c
++libeverything_1_0_la_LDFLAGS = -no-undefined
++libeverything_1_0_la_LIBADD = $(GOBJECT_LIBS)
++
+ libgimarshallingtests_1_0_la_SOURCES = gimarshallingtests.c
++libgimarshallingtests_1_0_la_LDFLAGS = -no-undefined
++libgimarshallingtests_1_0_la_LIBADD = $(GOBJECT_LIBS)
+ 
+ EXTRA_DIST += gimarshallingtests.h
+ 
+--- origsrc/gobject-introspection-1.30.0/tests/offsets/Makefile.am	2011-06-10 10:36:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/tests/offsets/Makefile.am	2011-11-15 19:39:18.777496500 -0600
+@@ -18,7 +18,7 @@ liboffsets_la_SOURCES = \
+ 	offsets.c
+ liboffsets_la_CPPFLAGS = $(GIREPO_CFLAGS)
+ # dummy rpath to get built dynamically (huh?)
+-liboffsets_la_LDFLAGS = -avoid-version -rpath $(libdir)
++liboffsets_la_LDFLAGS = -avoid-version -rpath $(libdir) -no-undefined
+ 
+ Offsets-1.0.gir: liboffsets.la offsets.h
+ Offsets_1_0_gir_INCLUDES = GObject-2.0
+--- origsrc/gobject-introspection-1.30.0/tests/scanner/Makefile.am	2011-09-09 15:48:44.000000000 -0500
++++ src/gobject-introspection-1.30.0/tests/scanner/Makefile.am	2011-11-15 19:40:38.187606100 -0600
+@@ -36,7 +36,7 @@ libregress_la_CFLAGS = $(AM_CFLAGS) $(CA
+ libregress_la_LDFLAGS = $(AM_LDFLAGS)
+ 
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ AM_LDFLAGS += -no-undefined
+ endif
+ 

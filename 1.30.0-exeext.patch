@@ -1,7 +1,7 @@
---- origsrc/gobject-introspection-0.10.6/Makefile-gir.am
-+++ src/gobject-introspection-0.10.6/Makefile-gir.am
-@@ -15,17 +15,17 @@ STATIC_GIRSOURCES =               \
- EXTRA_DIST += $(STATIC_GIRSOURCES)
+--- origsrc/gobject-introspection-1.30.0/Makefile-gir.am	2011-09-03 13:36:47.000000000 -0500
++++ src/gobject-introspection-1.30.0/Makefile-gir.am	2011-11-15 19:48:04.068221400 -0600
+@@ -26,17 +26,17 @@ CLEANFILES += gir/cairo-1.0.gir
+ EXTRA_DIST += gir/cairo-1.0.gir.in
  
  # Doesn't seem to work to do gir/%.typelib =(
 -gir/cairo-1.0.typelib: g-ir-compiler
@@ -29,28 +29,8 @@
  
  # glib with source (to enable documentation)
  if WITH_GLIBSRC
-@@ -85,7 +85,7 @@ GLib_2_0_gir_FILES =  \
- 
- BUILT_GIRSOURCES += GLib-2.0.gir
- 
--GLib-2.0.gir: g-ir-scanner g-ir-compiler
-+GLib-2.0.gir: g-ir-scanner g-ir-compiler$(EXEEXT)
- 
- gir/DBusGLib-1.0.typelib: GObject-2.0.gir
- 
---- origsrc/gobject-introspection-0.10.3/common.mk	2010-11-11 08:58:33.000000000 -0600
-+++ src/gobject-introspection-0.10.3/common.mk	2011-03-02 20:22:13.446982100 -0600
-@@ -11,7 +11,7 @@ INTROSPECTION_SCANNER = \
-         PYTHONPATH=$(top_builddir):$(top_srcdir) \
- 	UNINSTALLED_INTROSPECTION_SRCDIR=$(top_srcdir) \
- 	UNINSTALLED_INTROSPECTION_BUILDDIR=$(top_builddir) \
--    $(top_builddir)/g-ir-scanner$(EXEEXT)
-+    $(top_builddir)/g-ir-scanner
- INTROSPECTION_SCANNER_ARGS = \
-     --verbose \
-     -I$(top_srcdir) \
---- origsrc/gobject-introspection-0.10.3/gobject-introspection-1.0.pc.in	2010-10-29 12:36:40.000000000 -0500
-+++ src/gobject-introspection-0.10.3/gobject-introspection-1.0.pc.in	2011-03-02 20:22:50.512646800 -0600
+--- origsrc/gobject-introspection-1.30.0/gobject-introspection-1.0.pc.in	2011-06-10 10:36:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/gobject-introspection-1.0.pc.in	2011-11-15 19:48:33.608262200 -0600
 @@ -7,8 +7,8 @@ datadir=@datadir@
  includedir=@includedir@
  
@@ -62,8 +42,8 @@
  gidatadir=${datadir}/gobject-introspection-1.0
  girdir=${datadir}/gir-1.0
  typelibdir=${libdir}/girepository-1.0
---- origsrc/gobject-introspection-0.10.3/gobject-introspection-no-export-1.0.pc.in	2010-09-02 08:41:11.000000000 -0500
-+++ src/gobject-introspection-0.10.3/gobject-introspection-no-export-1.0.pc.in	2011-03-02 20:22:55.941456200 -0600
+--- origsrc/gobject-introspection-1.30.0/gobject-introspection-no-export-1.0.pc.in	2011-06-10 10:36:50.000000000 -0500
++++ src/gobject-introspection-1.30.0/gobject-introspection-no-export-1.0.pc.in	2011-11-15 19:48:53.148289200 -0600
 @@ -7,8 +7,8 @@ datadir=@datadir@
  includedir=@includedir@
  
@@ -75,3 +55,17 @@
  girdir=${datadir}/gir-1.0
  typelibdir=${libdir}/girepository-1.0
  
+--- origsrc/gobject-introspection-1.30.0/tests/scanner/Makefile.am	2011-09-09 15:48:44.000000000 -0500
++++ src/gobject-introspection-1.30.0/tests/scanner/Makefile.am	2011-11-15 19:40:38.187606100 -0600
+@@ -106,9 +106,9 @@ barapp_SOURCES = $(srcdir)/barapp.c $(sr
+ barapp_LDADD = $(top_builddir)/libgirepository-1.0.la
+ barapp_LDFLAGS = -export-dynamic
+ 
+-Bar-1.0.gir: barapp
++Bar-1.0.gir: barapp$(EXEEXT)
+ Bar_1_0_gir_PACKAGES = gobject-2.0
+-Bar_1_0_gir_PROGRAM = ./barapp
++Bar_1_0_gir_PROGRAM = ./barapp$(EXEEXT)
+ Bar_1_0_gir_INCLUDES = GObject-2.0
+ Bar_1_0_gir_FILES = $(barapp_SOURCES)
+ Bar_1_0_gir_SCANNERFLAGS = --accept-unprefixed
