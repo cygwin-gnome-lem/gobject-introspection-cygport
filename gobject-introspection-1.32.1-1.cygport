@@ -6,6 +6,7 @@ PATCH_URI="
 	1.30.0-cygwin.patch
 	1.30.0-exeext.patch
 	0.9.5-tests-expected.patch
+	1.32.1-inline-syntax.patch
 "
 
 PKG_NAMES="${PN} libgirepository1.0_1 libgirepository1.0-devel"
@@ -23,3 +24,5 @@ girepository_GLib2_0_CONTENTS="--exclude=GIR* --exclude=GL-* usr/*/gir*/G*-2.0.*
 girepository_x11_CONTENTS="--exclude=cairo-1.0.* --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
+
+KEEP_LA_FILES="none"

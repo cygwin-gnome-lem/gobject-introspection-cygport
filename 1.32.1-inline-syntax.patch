@@ -1,0 +1,20 @@
+Silences errors such as these:
+
+/usr/include/stdio.h:597: syntax error, unexpected INT, expecting ',' or 
+';' in 'extern __inline__ __attribute__ ((__always_inline__)) int 
+__sgetc_r(struct _reent *__ptr, FILE *__p)' at 'int'
+
+/usr/include/sys/sysmacros.h:17: syntax error, unexpected INT, expecting 
+',' or ';' in 'extern __inline__ __attribute__ ((__always_inline__)) int 
+gnu_dev_minor(dev_t);' at 'int'
+
+--- origsrc/gobject-introspection-1.32.1/giscanner/scannerlexer.l	2012-04-17 13:24:58.000000000 -0500
++++ src/gobject-introspection-1.32.1/giscanner/scannerlexer.l	2012-06-29 02:49:53.750913500 -0500
+@@ -141,6 +141,7 @@ stringtext				([^\\\"])|(\\.)
+ "__const"                               { return CONST; }
+ "__extension__"                         { return EXTENSION; }
+ "__inline"				{ return INLINE; }
++"__inline__"				{ return INLINE; }
+ "__nonnull" 			        { if (!parse_ignored_macro()) REJECT; }
+ "__signed__"				{ return SIGNED; }
+ "__restrict"				{ return RESTRICT; }
