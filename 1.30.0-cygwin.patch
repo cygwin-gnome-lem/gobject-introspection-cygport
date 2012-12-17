@@ -47,25 +47,15 @@
  
  # Checks for programs.
 @@ -143,6 +150,9 @@ fi
+ AM_CONDITIONAL(BUILD_TESTS, test x$enable_tests != xno)
  
- if test x$have_cairo_gobject = xyes; then
-   case "$host" in
-+    *-*-cygwin*)
-+      CAIRO_SHARED_LIBRARY="cygcairo-gobject-2.dll"
-+      ;;
-     *-*-darwin*)
-       CAIRO_SHARED_LIBRARY="libcairo-gobject.2.dylib"
-       ;;
-@@ -156,6 +166,9 @@ if test x$have_cairo_gobject = xyes; the
-   CAIRO_GIR_PACKAGE="cairo-gobject"
- elif test x$have_cairo = xyes; then
-   case "$host" in
-+    *-*-cygwin*)
-+      CAIRO_SHARED_LIBRARY="cygcairo-2.dll"
-+      ;;
-     *-*-darwin*)
-       CAIRO_SHARED_LIBRARY="libcairo.2.dylib"
-       ;;
+ case "$host" in
++  *-*-cygwin*)
++    CAIRO_SHARED_LIBRARY="cygcairo-gobject-2.dll"
++    ;;
+   *-*-darwin*)
+     CAIRO_SHARED_LIBRARY="libcairo-gobject.2.dylib"
+     ;;
 @@ -261,7 +274,7 @@ case "$host" in
  	;;
  esac

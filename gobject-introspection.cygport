@@ -1,5 +1,12 @@
-inherit gnome2
+inherit gnome2 python
 
+NAME="gobject-introspection"
+VERSION=1.34.2
+RELEASE=1
+CATEGORY="GNOME"
+SUMMARY="GObject Introspection tools"
+DESCRIPTION="The goal of the project is to describe GObject APIs and collect
+them in a uniform, machine readable format."
 HOMEPAGE="http://live.gnome.org/GObjectIntrospection"
 
 PATCH_URI="
@@ -12,17 +19,22 @@ PATCH_URI="
 PKG_NAMES="${PN} libgirepository1.0_1 libgirepository1.0-devel"
 gobject_introspection_CONTENTS="--exclude=gir-1.0 --exclude=gtk-doc
                                 usr/bin/g-ir-* usr/lib/${PN}/ usr/share/"
+gobject_introspection_SUMMARY="GObject Introspection tools"
+libgirepository1_0_1_SUMMARY="GObject Introspection library (runtime)"
 libgirepository1_0_1_CONTENTS="usr/bin/cyggirepository-1.0-1.dll"
+libgirepository1_0_devel_SUMMARY="GObject Introspection library (development)"
 libgirepository1_0_devel_CONTENTS="usr/include/ usr/lib/libgirepository-1.0.*
                                    usr/lib/pkgconfig/ usr/share/gtk-doc/"
 
 PKG_NAMES+=" girepository-cairo1.0 girepository-GIRepository2.0
              girepository-GLib2.0 girepository-x11"
+girepository_cairo1_0_SUMMARY="GObject Introspection data for libcairo"
 girepository_cairo1_0_CONTENTS="usr/*/gir*/cairo-1.0.*"
+girepository_GIRepository2_0_SUMMARY="GObject Introspection library (GObject Introspection data)"
 girepository_GIRepository2_0_CONTENTS="usr/*/gir*/GIRepository-2.0.*"
+girepository_GLib2_0_SUMMARY="GLib GObjectIntrospection data"
 girepository_GLib2_0_CONTENTS="--exclude=GIR* --exclude=GL-* usr/*/gir*/G*-2.0.*"
+girepository_x11_SUMMARY="GObject Introspection data for X11 libraries"
 girepository_x11_CONTENTS="--exclude=cairo-1.0.* --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
-
-KEEP_LA_FILES="none"

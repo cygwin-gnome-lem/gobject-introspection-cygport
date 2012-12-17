@@ -1,6 +1,0 @@
-category: Gnome
-requires: libcairo2
-external-source: gobject-introspection
-sdesc: "GObject Introspection data for libcairo"
-ldesc: "The goal of the project is to describe GObject APIs and collect 
-them in a uniform, machine readable format."
