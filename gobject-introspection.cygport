@@ -1,25 +1,27 @@
 inherit gnome2 python
 
 NAME="gobject-introspection"
-VERSION=1.34.2
-RELEASE=3
-CATEGORY="GNOME"
+VERSION=1.36.0
+RELEASE=1
+CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
 DESCRIPTION="The goal of the project is to describe GObject APIs and collect
 them in a uniform, machine readable format."
 HOMEPAGE="http://live.gnome.org/GObjectIntrospection"
 
 PATCH_URI="
-	1.30.0-cygwin.patch
+	1.36.0-cygwin.patch
 	1.30.0-exeext.patch
-	0.9.5-tests-expected.patch
+	1.36.0-tests-expected.patch
 	1.32.1-inline-syntax.patch
+	1.36.0-python-libs.patch
 "
 
-PKG_NAMES="${PN} libgirepository1.0_1 libgirepository1.0-devel"
-gobject_introspection_CONTENTS="--exclude=gir-1.0 --exclude=gtk-doc
-                                usr/bin/g-ir-* usr/lib/${PN}/ usr/share/"
+PKG_NAMES="${NAME} libgirepository1.0_1 libgirepository1.0-devel"
+gobject_introspection_CATEGORY="Devel"
 gobject_introspection_SUMMARY="GObject Introspection tools"
+gobject_introspection_CONTENTS="--exclude=gir-1.0 --exclude=gtk-doc
+                                usr/bin/g-ir-* usr/lib/${NAME}/ usr/share/"
 libgirepository1_0_1_SUMMARY="GObject Introspection library (runtime)"
 libgirepository1_0_1_CONTENTS="usr/bin/cyggirepository-1.0-1.dll"
 libgirepository1_0_devel_SUMMARY="GObject Introspection library (development)"

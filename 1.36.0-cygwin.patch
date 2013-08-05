@@ -1,0 +1,159 @@
+--- origsrc/gobject-introspection-1.36.0/Makefile-giscanner.am	2013-08-04 21:53:06.233614900 -0500
++++ src/gobject-introspection-1.36.0/Makefile-giscanner.am	2013-08-04 21:52:24.000000000 -0500
+@@ -101,7 +101,7 @@ _giscanner_la_LIBADD = libgiscanner.la $
+ _giscanner_la_LDFLAGS = \
+ 	-module -avoid-version -export-symbols-regex init_giscanner
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ # Windows requires Python extension modules to be explicitly
+ # linked to libpython. Extension modules are shared libaries
+ # (.dll files), but need to be called .pyd for Python to load
+@@ -110,8 +110,12 @@ _giscanner_la_LIBADD += \
+ 	$(PYTHON_LIBS)
+ 
+ _giscanner_la_LDFLAGS += \
+-	-no-undefined \
++	-no-undefined
++endif
++if OS_WIN32
++_giscanner_la_LDFLAGS += \
+ 	-shrext ".pyd"
+ endif
+ 
++
+ _giscanner_la_SOURCES = giscanner/giscannermodule.c
+--- origsrc/gobject-introspection-1.36.0/configure.ac	2013-08-04 21:53:06.241615400 -0500
++++ src/gobject-introspection-1.36.0/configure.ac	2013-08-04 21:52:24.000000000 -0500
+@@ -25,13 +25,20 @@ AM_SILENT_RULES([yes])
+ # Check for Win32
+ AC_CANONICAL_HOST
+ case "$host" in
++*-*-cygwin*)
++	platform_win32=yes
++	os_win32=no
++	;;
+ *-*-mingw*)
++	platform_win32=yes
+ 	os_win32=yes
+ 	;;
+ *)
++	platform_win32=no
+ 	os_win32=no
+ 	;;
+ esac
++AM_CONDITIONAL(PLATFORM_WIN32, [test "x$platform_win32" = "xyes"])
+ AM_CONDITIONAL(OS_WIN32, [test "x$os_win32" = "xyes"])
+ 
+ # Checks for programs.
+@@ -145,6 +152,9 @@ AS_IF([test x${with_cairo} != xno], [
+ AM_CONDITIONAL(HAVE_CAIRO, test x$have_cairo = xyes)
+ 
+ case "$host" in
++  *-*-cygwin*)
++    CAIRO_SHARED_LIBRARY="cygcairo-gobject-2.dll"
++    ;;
+   *-*-darwin*)
+     CAIRO_SHARED_LIBRARY="libcairo-gobject.2.dylib"
+     ;;
+@@ -256,7 +266,7 @@ case "$host" in
+ 	;;
+ esac
+ AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
+-if test "x$os_win32" = "xyes"; then
++if test "x$platform_win32" = "xyes"; then
+   AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
+ fi
+ 
+--- origsrc/gobject-introspection-1.36.0/girepository/girepository.c	2013-08-04 21:53:06.249615900 -0500
++++ src/gobject-introspection-1.36.0/girepository/girepository.c	2013-08-04 21:52:24.000000000 -0500
+@@ -49,7 +49,7 @@ struct _GIRepositoryPrivate
+ 
+ G_DEFINE_TYPE (GIRepository, g_irepository, G_TYPE_OBJECT);
+ 
+-#ifdef G_PLATFORM_WIN32
++#ifdef G_OS_WIN32
+ 
+ #include <windows.h>
+ 
+--- origsrc/gobject-introspection-1.36.0/giscanner/dumper.py	2013-02-23 04:40:08.000000000 -0600
++++ src/gobject-introspection-1.36.0/giscanner/dumper.py	2013-08-04 23:53:22.969388600 -0500
+@@ -254,6 +254,8 @@ class DumpCompiler(object):
+         # but it is considered deprecated usage with that
+         if self._pkgconfig_msvc_flags:
+             args.extend(['-Fe'+output])
++        elif sys.platform == 'cygwin':
++            args.extend(['-o', output+'.exe'])
+         else:
+             args.extend(['-o', output])
+         if libtool:
+--- origsrc/gobject-introspection-1.36.0/giscanner/libtoolimporter.py	2013-08-04 21:53:06.256616300 -0500
++++ src/gobject-introspection-1.36.0/giscanner/libtoolimporter.py	2013-08-04 21:52:24.000000000 -0500
+@@ -58,7 +58,7 @@ class LibtoolImporter(object):
+ 
+         if platform_system == 'Darwin':
+             extension = '.dylib'
+-        elif platform_system == 'Windows':
++        elif platform_system == 'Windows' or sys.platform == 'cygwin':
+             extension = '.dll'
+         else:
+             extension = '.so'
+--- origsrc/gobject-introspection-1.36.0/giscanner/shlibs.py	2013-08-04 21:53:06.262616600 -0500
++++ src/gobject-introspection-1.36.0/giscanner/shlibs.py	2013-08-04 21:52:24.000000000 -0500
+@@ -48,7 +48,7 @@ def _resolve_libtool(options, binary, li
+ # is crazy enough to name a library liblib<foo> when lib<foo> exists.
+ #
+ def _ldd_library_pattern(library_name):
+-    return re.compile("(?<![A-Za-z0-9_-])(lib*%s[^A-Za-z0-9_-][^\s\(\)]*)"
++    return re.compile("(cyg%s-*[0-9]*\.dll)"
+                       % re.escape(library_name))
+ 
+ # This is a what we do for non-la files. We assume that we are on an
+--- origsrc/gobject-introspection-1.36.0/giscanner/utils.py	2013-08-04 21:53:06.270617100 -0500
++++ src/gobject-introspection-1.36.0/giscanner/utils.py	2013-08-04 21:52:24.000000000 -0500
+@@ -69,7 +69,7 @@ def to_underscores_noprefix(name):
+     name = _upperstr_pat2.sub(r'\1_\2', name)
+     return name
+ 
+-_libtool_pat = re.compile("dlname='([A-z0-9\.\-\+]+)'\n")
++_libtool_pat = re.compile("dlname='([A-z0-9/\.\-\+]+)'\n")
+ 
+ def _extract_dlname_field(la_file):
+     f = open(la_file)
+--- origsrc/gobject-introspection-1.36.0/tests/Makefile.am	2013-08-04 21:53:06.278617500 -0500
++++ src/gobject-introspection-1.36.0/tests/Makefile.am	2013-08-04 21:52:24.000000000 -0500
+@@ -19,7 +19,12 @@ tests_DATA =		    \
+ check_LTLIBRARIES = libeverything-1.0.la libgimarshallingtests-1.0.la
+ 
+ libeverything_1_0_la_SOURCES = everything.c
++libeverything_1_0_la_LDFLAGS = -no-undefined
++libeverything_1_0_la_LIBADD = $(GOBJECT_LIBS)
++
+ libgimarshallingtests_1_0_la_SOURCES = gimarshallingtests.c
++libgimarshallingtests_1_0_la_LDFLAGS = -no-undefined
++libgimarshallingtests_1_0_la_LIBADD = $(GOBJECT_LIBS)
+ 
+ EXTRA_DIST += gimarshallingtests.h
+ 
+--- origsrc/gobject-introspection-1.36.0/tests/offsets/Makefile.am	2013-08-04 21:53:06.284617900 -0500
++++ src/gobject-introspection-1.36.0/tests/offsets/Makefile.am	2013-08-04 21:52:24.000000000 -0500
+@@ -18,7 +18,7 @@ liboffsets_la_SOURCES = \
+ 	offsets.c
+ liboffsets_la_CPPFLAGS = $(GIREPO_CFLAGS)
+ # dummy rpath to get built dynamically (huh?)
+-liboffsets_la_LDFLAGS = -avoid-version -rpath $(libdir)
++liboffsets_la_LDFLAGS = -avoid-version -rpath $(libdir) -no-undefined
+ 
+ Offsets-1.0.gir: liboffsets.la offsets.h
+ Offsets_1_0_gir_INCLUDES = GObject-2.0
+--- origsrc/gobject-introspection-1.36.0/tests/scanner/Makefile.am	2013-08-04 21:53:06.290618200 -0500
++++ src/gobject-introspection-1.36.0/tests/scanner/Makefile.am	2013-08-04 21:52:26.000000000 -0500
+@@ -60,7 +60,7 @@ endif
+ libregress_la_LDFLAGS = $(AM_LDFLAGS)
+ 
+ 
+-if OS_WIN32
++if PLATFORM_WIN32
+ AM_LDFLAGS += -no-undefined
+ endif
+ 
