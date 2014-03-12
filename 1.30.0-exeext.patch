@@ -1,6 +1,6 @@
---- origsrc/gobject-introspection-1.30.0/Makefile-gir.am	2011-09-03 13:36:47.000000000 -0500
-+++ src/gobject-introspection-1.30.0/Makefile-gir.am	2011-11-15 19:48:04.068221400 -0600
-@@ -26,17 +26,17 @@ CLEANFILES += gir/cairo-1.0.gir
+--- origsrc/gobject-introspection-1.38.0/Makefile-gir.am
++++ src/gobject-introspection-1.38.0/Makefile-gir.am
+@@ -26,18 +26,18 @@ CLEANFILES += gir/cairo-1.0.gir
  EXTRA_DIST += gir/cairo-1.0.gir.in
  
  # Doesn't seem to work to do gir/%.typelib =(
@@ -15,6 +15,7 @@
 -gir/xlib-2.0.typelib: g-ir-compiler
 -gir/xfixes-4.0.typelib: g-ir-compiler
 -gir/xrandr-1.3.typelib: g-ir-compiler
+-gir/win32-1.0.typelib: g-ir-compiler
 +gir/cairo-1.0.typelib: g-ir-compiler$(EXEEXT)
 +gir/DBus-1.0.typelib: g-ir-compiler$(EXEEXT)
 +gir/DBusGLib-1.0.typelib: g-ir-compiler$(EXEEXT)
@@ -26,6 +27,7 @@
 +gir/xlib-2.0.typelib: g-ir-compiler$(EXEEXT)
 +gir/xfixes-4.0.typelib: g-ir-compiler$(EXEEXT)
 +gir/xrandr-1.3.typelib: g-ir-compiler$(EXEEXT)
++gir/win32-1.0.typelib: g-ir-compiler$(EXEEXT)
  
  # glib with source (to enable documentation)
  if WITH_GLIBSRC

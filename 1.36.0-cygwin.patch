@@ -76,14 +76,23 @@
  
  #include <windows.h>
  
---- origsrc/gobject-introspection-1.36.0/giscanner/dumper.py	2013-02-23 04:40:08.000000000 -0600
-+++ src/gobject-introspection-1.36.0/giscanner/dumper.py	2013-08-04 23:53:22.969388600 -0500
-@@ -254,6 +254,8 @@ class DumpCompiler(object):
+--- origsrc/gobject-introspection-1.38.0/giscanner/dumper.py	2014-03-12 01:25:43.494106400 -0500
++++ src/gobject-introspection-1.38.0/giscanner/dumper.py	2014-03-12 01:25:22.122892600 -0500
+@@ -224,6 +224,8 @@ class DumpCompiler(object):
+         # compilation result output
+         if self._pkgconfig_msvc_flags:
+             args.extend(['-c', '-Fe' + output, '-Fo' + output])
++        elif sys.platform == 'cygwin':
++            args.extend(['-c', '-o', output + '.exe'])
+         else:
+             args.extend(['-c', '-o', output])
+         for source in sources:
+@@ -255,6 +257,8 @@ class DumpCompiler(object):
          # but it is considered deprecated usage with that
          if self._pkgconfig_msvc_flags:
-             args.extend(['-Fe'+output])
+             args.extend(['-Fe' + output])
 +        elif sys.platform == 'cygwin':
-+            args.extend(['-o', output+'.exe'])
++            args.extend(['-o', output + '.exe'])
          else:
              args.extend(['-o', output])
          if libtool:

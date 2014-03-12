@@ -1,7 +1,7 @@
 inherit gnome2 python
 
 NAME="gobject-introspection"
-VERSION=1.36.0
+VERSION=1.38.0
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
@@ -17,7 +17,7 @@ PATCH_URI="
 	1.36.0-python-libs.patch
 "
 
-PKG_NAMES="${NAME} libgirepository1.0_1 libgirepository1.0-devel"
+PKG_NAMES="${NAME} libgirepository1.0_1 libgirepository1.0-devel libgirepository1.0-doc"
 gobject_introspection_CATEGORY="Devel"
 gobject_introspection_SUMMARY="GObject Introspection tools"
 gobject_introspection_CONTENTS="--exclude=gir-1.0 --exclude=gtk-doc
@@ -26,7 +26,10 @@ libgirepository1_0_1_SUMMARY="GObject Introspection library (runtime)"
 libgirepository1_0_1_CONTENTS="usr/bin/cyggirepository-1.0-1.dll"
 libgirepository1_0_devel_SUMMARY="GObject Introspection library (development)"
 libgirepository1_0_devel_CONTENTS="usr/include/ usr/lib/libgirepository-1.0.*
-                                   usr/lib/pkgconfig/ usr/share/gtk-doc/"
+                                   usr/lib/pkgconfig/"
+libgirepository1_0_doc_CATEGORY="Doc"
+libgirepository1_0_doc_SUMMARY="GObject Introspection library (API docs)"
+libgirepository1_0_doc_CONTENTS="usr/share/gtk-doc/"
 
 PKG_NAMES+=" girepository-cairo1.0 girepository-GIRepository2.0
              girepository-GLib2.0 girepository-x11"
