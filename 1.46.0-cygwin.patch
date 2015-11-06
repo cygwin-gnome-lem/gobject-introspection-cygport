@@ -1,6 +1,6 @@
---- origsrc/gobject-introspection-1.42.0/Makefile-giscanner.am	2014-08-31 09:31:38.000000000 -0500
-+++ src/gobject-introspection-1.42.0/Makefile-giscanner.am	2015-01-01 20:22:30.956377500 -0600
-@@ -115,7 +115,7 @@ _giscanner_la_LIBADD = libgiscanner.la $
+--- origsrc/gobject-introspection-1.46.0/Makefile-giscanner.am	2015-07-30 05:32:27.000000000 -0500
++++ src/gobject-introspection-1.46.0/Makefile-giscanner.am	2015-11-05 19:06:13.352644100 -0600
+@@ -116,7 +116,7 @@ _giscanner_la_LIBADD = libgiscanner.la $
  _giscanner_la_LDFLAGS = \
  	-module -avoid-version -export-symbols-regex init_giscanner
  
@@ -9,7 +9,7 @@
  # Windows requires Python extension modules to be explicitly
  # linked to libpython. Extension modules are shared libaries
  # (.dll files), but need to be called .pyd for Python to load
-@@ -124,8 +124,12 @@ _giscanner_la_LIBADD += \
+@@ -125,8 +125,12 @@ _giscanner_la_LIBADD += \
  	$(PYTHON_LIBS)
  
  _giscanner_la_LDFLAGS += \
@@ -23,8 +23,8 @@
  
 +
  _giscanner_la_SOURCES = giscanner/giscannermodule.c
---- origsrc/gobject-introspection-1.42.0/configure.ac	2014-09-23 06:35:43.000000000 -0500
-+++ src/gobject-introspection-1.42.0/configure.ac	2015-01-01 20:22:30.961878200 -0600
+--- origsrc/gobject-introspection-1.46.0/configure.ac	2015-09-22 06:24:07.000000000 -0500
++++ src/gobject-introspection-1.46.0/configure.ac	2015-11-05 19:06:13.352644100 -0600
 @@ -29,13 +29,20 @@ AC_SUBST(GI_VERSION)
  # Check for Win32
  AC_CANONICAL_HOST
@@ -65,8 +65,8 @@
    AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
  fi
  
---- origsrc/gobject-introspection-1.42.0/girepository/girepository.c	2014-07-17 12:32:46.000000000 -0500
-+++ src/gobject-introspection-1.42.0/girepository/girepository.c	2015-01-01 20:22:30.967879000 -0600
+--- origsrc/gobject-introspection-1.46.0/girepository/girepository.c	2015-07-30 05:32:27.000000000 -0500
++++ src/gobject-introspection-1.46.0/girepository/girepository.c	2015-11-05 19:06:13.352644100 -0600
 @@ -58,7 +58,7 @@ struct _GIRepositoryPrivate
  
  G_DEFINE_TYPE (GIRepository, g_irepository, G_TYPE_OBJECT);
@@ -76,39 +76,8 @@
  
  #include <windows.h>
  
---- origsrc/gobject-introspection-1.42.0/giscanner/dumper.py	2014-08-31 09:31:38.000000000 -0500
-+++ src/gobject-introspection-1.42.0/giscanner/dumper.py	2015-01-01 20:22:30.973379700 -0600
-@@ -229,6 +229,8 @@ class DumpCompiler(object):
-         # compilation result output
-         if self._pkgconfig_msvc_flags:
-             args.extend(['-c', '-Fe' + output, '-Fo' + output])
-+        elif sys.platform == 'cygwin':
-+            args.extend(['-c', '-o', output + '.exe'])
-         else:
-             args.extend(['-c', '-o', output])
-         for source in sources:
-@@ -260,6 +262,8 @@ class DumpCompiler(object):
-         # but it is considered deprecated usage with that
-         if self._pkgconfig_msvc_flags:
-             args.extend(['-Fe' + output])
-+        elif sys.platform == 'cygwin':
-+            args.extend(['-o', output + '.exe'])
-         else:
-             args.extend(['-o', output])
-         if libtool:
---- origsrc/gobject-introspection-1.42.0/giscanner/libtoolimporter.py	2014-03-05 22:09:17.000000000 -0600
-+++ src/gobject-introspection-1.42.0/giscanner/libtoolimporter.py	2015-01-01 20:22:30.977880200 -0600
-@@ -58,7 +58,7 @@ class LibtoolImporter(object):
- 
-         if platform_system == 'Darwin':
-             extension = '.dylib'
--        elif platform_system == 'Windows':
-+        elif platform_system == 'Windows' or sys.platform == 'cygwin':
-             extension = '.dll'
-         else:
-             extension = '.so'
---- origsrc/gobject-introspection-1.42.0/giscanner/shlibs.py	2014-08-31 09:31:38.000000000 -0500
-+++ src/gobject-introspection-1.42.0/giscanner/shlibs.py	2015-01-01 20:31:37.939835600 -0600
+--- origsrc/gobject-introspection-1.46.0/giscanner/shlibs.py	2015-07-18 08:27:49.000000000 -0500
++++ src/gobject-introspection-1.46.0/giscanner/shlibs.py	2015-11-05 19:06:13.372644100 -0600
 @@ -56,6 +56,8 @@ def _ldd_library_pattern(library_name):
      pattern = "(?<![A-Za-z0-9_-])(lib*%s[^A-Za-z0-9_-][^\s\(\)]*)"
      if platform.system() == 'Darwin':
@@ -118,9 +87,9 @@
      return re.compile(pattern % re.escape(library_name))
  
  
---- origsrc/gobject-introspection-1.42.0/giscanner/utils.py	2014-03-05 22:09:17.000000000 -0600
-+++ src/gobject-introspection-1.42.0/giscanner/utils.py	2015-01-01 20:22:30.986381300 -0600
-@@ -75,7 +75,7 @@ def to_underscores_noprefix(name):
+--- origsrc/gobject-introspection-1.46.0/giscanner/utils.py	2015-08-21 07:03:01.000000000 -0500
++++ src/gobject-introspection-1.46.0/giscanner/utils.py	2015-11-05 19:06:13.372644100 -0600
+@@ -76,7 +76,7 @@ def to_underscores_noprefix(name):
      return name
  
  
@@ -129,8 +98,8 @@
  
  
  def _extract_dlname_field(la_file):
---- origsrc/gobject-introspection-1.42.0/tests/Makefile.am	2014-09-22 22:40:35.000000000 -0500
-+++ src/gobject-introspection-1.42.0/tests/Makefile.am	2015-01-01 20:22:30.989381700 -0600
+--- origsrc/gobject-introspection-1.46.0/tests/Makefile.am	2014-09-17 08:06:32.000000000 -0500
++++ src/gobject-introspection-1.46.0/tests/Makefile.am	2015-11-05 19:06:13.372644100 -0600
 @@ -20,7 +20,12 @@ tests_DATA =		    \
  EXTRA_LTLIBRARIES = libeverything-1.0.la libgimarshallingtests-1.0.la
  
@@ -144,8 +113,8 @@
  
  EXTRA_DIST += \
  	gimarshallingtests.h \
---- origsrc/gobject-introspection-1.42.0/tests/offsets/Makefile.am	2014-09-22 22:40:35.000000000 -0500
-+++ src/gobject-introspection-1.42.0/tests/offsets/Makefile.am	2015-01-01 20:22:30.992382100 -0600
+--- origsrc/gobject-introspection-1.46.0/tests/offsets/Makefile.am	2015-07-18 08:27:49.000000000 -0500
++++ src/gobject-introspection-1.46.0/tests/offsets/Makefile.am	2015-11-05 19:06:13.382644100 -0600
 @@ -18,7 +18,7 @@ liboffsets_la_SOURCES = \
  	offsets.c
  liboffsets_la_CPPFLAGS = $(GIREPO_CFLAGS) $(GI_HIDDEN_VISIBILITY_CFLAGS) -I$(top_srcdir)/tests
@@ -155,8 +124,8 @@
  
  Offsets-1.0.gir: liboffsets.la offsets.h
  Offsets_1_0_gir_INCLUDES = GObject-2.0
---- origsrc/gobject-introspection-1.42.0/tests/scanner/Makefile.am	2014-08-31 09:31:38.000000000 -0500
-+++ src/gobject-introspection-1.42.0/tests/scanner/Makefile.am	2015-01-01 20:22:30.995382500 -0600
+--- origsrc/gobject-introspection-1.46.0/tests/scanner/Makefile.am	2015-11-05 19:00:52.168166500 -0600
++++ src/gobject-introspection-1.46.0/tests/scanner/Makefile.am	2015-11-05 19:15:38.186456000 -0600
 @@ -68,7 +68,7 @@ endif
  libregress_la_LDFLAGS = $(AM_LDFLAGS)
  
@@ -166,3 +135,12 @@
  AM_LDFLAGS += -no-undefined
  endif
  
+@@ -155,7 +155,7 @@ barapp_SOURCES = $(srcdir)/barapp.c $(sr
+ barapp_LDADD = $(top_builddir)/libgirepository-1.0.la
+ barapp_LDFLAGS = -export-dynamic
+ 
+-Bar-1.0.gir: barapp
++Bar-1.0.gir: barapp$(EXEEXT)
+ Bar_1_0_gir_PACKAGES = gobject-2.0
+ Bar_1_0_gir_PROGRAM = ./barapp$(EXEEXT)
+ Bar_1_0_gir_CFLAGS = $(GI_SCANNER_CFLAGS)

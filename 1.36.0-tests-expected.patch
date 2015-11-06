@@ -42,6 +42,17 @@
               c:identifier-prefixes="S"
               c:symbol-prefixes="s">
      <enumeration name="DBusError"
+--- origsrc/gobject-introspection-1.46.0/tests/scanner/Typedefs-1.0-expected.gir	2014-02-08 10:22:47.000000000 -0600
++++ src/gobject-introspection-1.46.0/tests/scanner/Typedefs-1.0-expected.gir	2015-11-05 19:18:42.207981400 -0600
+@@ -11,7 +11,7 @@ and/or use gtk-doc annotations.  -->
+   <c:include name="typedefs.h"/>
+   <namespace name="Typedefs"
+              version="1.0"
+-             shared-library="libtypedefs.so"
++             shared-library="cygtypedefs.dll"
+              c:identifier-prefixes="Typedefs"
+              c:symbol-prefixes="typedefs">
+     <record name="BoxedWithAnonymousTypedef"
 --- origsrc/gobject-introspection-1.36.0/tests/scanner/Utility-1.0-expected.gir	2013-08-04 21:54:10.060265600 -0500
 +++ src/gobject-introspection-1.36.0/tests/scanner/Utility-1.0-expected.gir	2013-08-04 21:52:26.000000000 -0500
 @@ -11,7 +11,7 @@ and/or use gtk-doc annotations.  -->
