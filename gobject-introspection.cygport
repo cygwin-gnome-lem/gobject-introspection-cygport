@@ -1,7 +1,7 @@
 inherit gnome2 python2
 
 NAME="gobject-introspection"
-VERSION=1.50.0
+VERSION=1.52.1
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
