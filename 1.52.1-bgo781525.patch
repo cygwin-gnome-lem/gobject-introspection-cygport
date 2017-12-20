@@ -1,0 +1,325 @@
+--- origsrc/gobject-introspection-1.52.1/giscanner/ccompiler.py	2017-03-26 13:53:10.000000000 -0500
++++ src/gobject-introspection-1.52.1/giscanner/ccompiler.py	2017-12-19 22:28:38.989844600 -0600
+@@ -113,22 +113,18 @@ class CCompiler(object):
+         # An "internal" link is where the library to be introspected
+         # is being built in the current directory.
+ 
+-        if not libtool:
+-            # non-libtool case: prepare distutils use
+-            if self.check_is_msvc():
+-                for library in libraries + extra_libraries:
+-                    # MSVC Builds don't use libtool, so no .la libraries,
+-                    # so just add the library directly.
+-                    self.compiler.add_library(library)
+-                    for libpath in libpaths:
+-                        self.compiler.add_library_dir(libpath)
+-            else:
+-                # Search the current directory first
+-                # (This flag is not supported nor needed for Visual C++)
+-                self.compiler.add_library_dir('.')
+-                if os.name != 'nt':
+-                    self.compiler.add_runtime_library_dir('.')
++        runtime_path_envvar = []
++        runtime_paths = []
+ 
++        if self.check_is_msvc():
++            runtime_path_envvar = ['LIB', 'PATH']
++        else:
++            runtime_path_envvar = ['LD_LIBRARY_PATH']
++            # Search the current directory first
++            # (This flag is not supported nor needed for Visual C++)
++            args.append('-L.')
++
++            if not libtool:
+                 # https://bugzilla.gnome.org/show_bug.cgi?id=625195
+                 args.append('-Wl,-rpath,.')
+ 
+@@ -137,37 +133,51 @@ class CCompiler(object):
+                 if sys.platform != 'darwin':
+                     args.append('-Wl,--no-as-needed')
+ 
+-            for library in libraries + extra_libraries:
+-                self.compiler.add_library(library)
+-            if not self.check_is_msvc():
+-                for library_path in libpaths:
+-                    args.append('-L' + library_path)
+-                    if os.path.isabs(library_path):
+-                        args.append('-Wl,-rpath,' + library_path)
+-
+-        else:
+-            # libtool case: assemble linker command arguments, like we did before
+-            args.append('-L.')
+-            for library in libraries:
++        for library in libraries + extra_libraries:
++            if self.check_is_msvc():
++                # Note that Visual Studio builds do not use libtool!
++                if library != 'm':
++                    args.append(library + '.lib')
++            else:
+                 if library.endswith(".la"):  # explicitly specified libtool library
+                     args.append(library)
+                 else:
+                     args.append('-l' + library)
+ 
+-            for library_path in libpaths:
++        for library_path in libpaths:
++            # The dumper program needs to look for dynamic libraries
++            # in the library paths first
++            if self.check_is_msvc():
++                library_path = library_path.replace('/', '\\')
++                args.append('-libpath:' + library_path)
++            else:
+                 args.append('-L' + library_path)
+                 if os.path.isabs(library_path):
+-                    args.append('-rpath')
+-                    args.append(library_path)
++                    if libtool:
++                        args.append('-rpath')
++                        args.append(library_path)
++                    else:
++                        args.append('-Wl,-rpath,' + library_path)
++
++            runtime_paths.append(library_path)
+ 
+-    def get_external_link_flags(self, args, libtool, libraries):
++        for envvar in runtime_path_envvar:
++            if envvar in os.environ:
++                os.environ[envvar] = \
++                    os.pathsep.join(runtime_paths + [os.environ[envvar]])
++            else:
++                os.environ[envvar] = os.pathsep.join(runtime_paths)
++
++    def get_external_link_flags(self, args, libraries):
+         # An "external" link is where the library to be introspected
+         # is installed on the system; this case is used for the scanning
+         # of GLib in gobject-introspection itself.
+ 
+         for library in libraries:
+-            if not libtool:
+-                self.compiler.add_library(library)
++            if self.check_is_msvc():
++                # Visual Studio: don't attempt to link to m.lib
++                if library != 'm':
++                    args.append(library + ".lib")
+             else:
+                 if library.endswith(".la"):  # explicitly specified libtool library
+                     args.append(library)
+@@ -238,24 +248,7 @@ class CCompiler(object):
+                                      macros=macros,
+                                      include_dirs=includes,
+                                      extra_postargs=extra_postargs,
+-                                     output_dir=str(source_str[tmpdir_idx + 1:
+-                                                    source_str.rfind(os.sep)]))
+-
+-    def link(self, output, objects, lib_args):
+-        # Note: This is used for non-libtool builds only!
+-        extra_preargs = []
+-        extra_postargs = []
+-        library_dirs = []
+-        libraries = []
+-
+-        for arg in lib_args:
+-            extra_postargs.append(arg)
+-
+-        self.compiler.link(target_desc=self.compiler.EXECUTABLE,
+-                           objects=objects,
+-                           output_filename=output,
+-                           extra_preargs=extra_preargs,
+-                           extra_postargs=extra_postargs)
++                                     output_dir=os.path.abspath(os.sep))
+ 
+     def resolve_windows_libs(self, libraries, options):
+         args = []
+@@ -279,6 +272,10 @@ class CCompiler(object):
+             args.append('dumpbin.exe')
+             args.append('-symbols')
+ 
++            # Work around the attempt to resolve m.lib on Python 2.x
++            if sys.version_info.major < 3:
++                libraries[:] = [lib for lib in libraries if lib != 'm']
++
+         # When we are not using Visual C++ (i.e. we are using GCC)...
+         else:
+             libtool = utils.get_libtool_command(options)
+--- origsrc/gobject-introspection-1.52.1/giscanner/dumper.py	2017-03-26 13:53:10.000000000 -0500
++++ src/gobject-introspection-1.52.1/giscanner/dumper.py	2017-12-19 22:28:25.120989800 -0600
+@@ -99,10 +99,10 @@ class DumpCompiler(object):
+         self._uninst_srcdir = os.environ.get('UNINSTALLED_INTROSPECTION_SRCDIR')
+         self._packages = ['gio-2.0 gmodule-2.0']
+         self._packages.extend(options.packages)
+-        if hasattr(self._compiler.compiler, 'linker_exe'):
+-            self._linker_cmd = self._compiler.compiler.linker_exe
++        if self._compiler.check_is_msvc():
++            self._linker_cmd = ['link.exe']
+         else:
+-            self._linker_cmd = []
++            self._linker_cmd = shlex.split(os.environ.get('CC', 'cc'))
+ 
+     # Public API
+ 
+@@ -212,21 +212,25 @@ class DumpCompiler(object):
+         libtool = utils.get_libtool_command(self._options)
+         if libtool:
+             # Note: MSVC Builds do not use libtool!
+-            # In the libtool case, put together the linker command, as we did before.
+-            # We aren't using distutils to link in this case.
+             args.extend(libtool)
+             args.append('--mode=link')
+             args.append('--tag=CC')
+             if self._options.quiet:
+                 args.append('--silent')
+ 
+-            args.extend(self._linker_cmd)
++        args.extend(self._linker_cmd)
+ 
++        # We can use -o for the Microsoft compiler/linker,
++        # but it is considered deprecated usage
++        if self._compiler.check_is_msvc():
++            args.extend(['-out:' + output])
++        else:
+             args.extend(['-o', output])
+-            if os.name == 'nt':
+-                args.append('-Wl,--export-all-symbols')
+-            else:
+-                args.append('-export-dynamic')
++            if libtool:
++                if os.name == 'nt':
++                    args.append('-Wl,--export-all-symbols')
++                else:
++                    args.append('-export-dynamic')
+ 
+         if not self._compiler.check_is_msvc():
+             # These envvars are not used for MSVC Builds!
+@@ -246,8 +250,7 @@ class DumpCompiler(object):
+                 raise CompilerError(
+                     "Could not find object file: %s" % (source, ))
+ 
+-        if libtool:
+-            args.extend(sources)
++        args.extend(sources)
+ 
+         pkg_config_libs = self._run_pkgconfig('--libs')
+ 
+@@ -261,66 +264,36 @@ class DumpCompiler(object):
+ 
+         else:
+             args.extend(pkg_config_libs)
+-            self._compiler.get_external_link_flags(args,
+-                                                   libtool,
+-                                                   self._options.libraries)
++            self._compiler.get_external_link_flags(args, self._options.libraries)
+ 
+         if not self._compiler.check_is_msvc():
+             for ldflag in shlex.split(os.environ.get('LDFLAGS', '')):
+                 args.append(ldflag)
+ 
+-        if not libtool:
+-            # non-libtool: prepare distutils for linking the introspection
+-            # dumper program...
+-            try:
+-                self._compiler.link(output,
+-                                    sources,
+-                                    args)
+-
+-            # Ignore failing to embed the manifest files, when the manifest
+-            # file does not exist, especially for MSVC 2010 and later builds.
+-            # If we are on Visual C++ 2005/2008, where
+-            # this embedding is required, the build will fail anyway, as
+-            # the dumper program will likely fail to run, and this means
+-            # something went wrong with the build.
+-            except LinkError as e:
+-                if self._compiler.check_is_msvc():
+-                    msg = str(e)
+-
+-                    if msg[msg.rfind('mt.exe'):] == 'mt.exe\' failed with exit status 31':
+-                        if sys.version_info < (3, 0):
+-                            sys.exc_clear()
+-                        pass
+-                    else:
+-                        raise LinkError(e)
+-                else:
+-                    raise LinkError(e)
+-        else:
+-            # libtool: Run the assembled link command, we don't use distutils
+-            # for linking here.
+-            if not self._options.quiet:
+-                print("g-ir-scanner: link: %s" % (
+-                    subprocess.list2cmdline(args), ))
+-                sys.stdout.flush()
+-            msys = os.environ.get('MSYSTEM', None)
++        if not self._options.quiet:
++            print("g-ir-scanner: link: %s" % (
++                subprocess.list2cmdline(args), ))
++            sys.stdout.flush()
++
++        msys = os.environ.get('MSYSTEM', None)
++        if msys:
++            shell = os.environ.get('SHELL', 'sh.exe')
++            # Create a temporary script file that
++            # runs the command we want
++            tf, tf_name = tempfile.mkstemp()
++            with os.fdopen(tf, 'wb') as f:
++                shellcontents = ' '.join([x.replace('\\', '/') for x in args])
++                fcontents = '#!/bin/sh\nunset PWD\n{}\n'.format(shellcontents)
++                f.write(fcontents)
++            shell = utils.which(shell)
++            args = [shell, tf_name.replace('\\', '/')]
++        try:
++            subprocess.check_call(args)
++        except subprocess.CalledProcessError as e:
++            raise LinkerError(e)
++        finally:
+             if msys:
+-                shell = os.environ.get('SHELL', 'sh.exe')
+-                # Create a temporary script file that
+-                # runs the command we want
+-                tf, tf_name = tempfile.mkstemp()
+-                with os.fdopen(tf, 'wb') as f:
+-                    shellcontents = ' '.join([x.replace('\\', '/') for x in args])
+-                    fcontents = '#!/bin/sh\nunset PWD\n{}\n'.format(shellcontents)
+-                    f.write(fcontents)
+-                shell = utils.which(shell)
+-                args = [shell, tf_name.replace('\\', '/')]
+-            try:
+-                subprocess.check_call(args)
+-            except subprocess.CalledProcessError as e:
+-                raise LinkerError(e)
+-            finally:
+-                if msys:
+-                    os.remove(tf_name)
++                os.remove(tf_name)
+ 
+ 
+ def compile_introspection_binary(options, get_type_functions,
+--- origsrc/gobject-introspection-1.52.1/giscanner/scannerparser.y	2014-08-04 09:37:07.000000000 -0500
++++ src/gobject-introspection-1.52.1/giscanner/scannerparser.y	2017-12-19 22:27:49.092681500 -0600
+@@ -1617,7 +1617,6 @@ gi_source_scanner_parse_macros (GISource
+     fdopen (g_file_open_tmp ("gen-introspect-XXXXXX.h", &tmp_name, &error),
+             "w+");
+   GList *l;
+-  g_unlink (tmp_name);
+ 
+   for (l = filenames; l != NULL; l = l->next)
+     {
+@@ -1756,6 +1755,8 @@ gi_source_scanner_parse_macros (GISource
+ 
+   rewind (fmacros);
+   gi_source_scanner_parse_file (scanner, fmacros);
++  fclose (fmacros);
++  g_unlink (tmp_name);
+ }
+ 
+ gboolean
+--- origsrc/gobject-introspection-1.52.1/giscanner/sourcescanner.py	2016-03-14 05:49:01.000000000 -0500
++++ src/gobject-introspection-1.52.1/giscanner/sourcescanner.py	2017-12-19 22:28:08.887443300 -0600
+@@ -290,7 +290,9 @@ class SourceScanner(object):
+ 
+         cc = CCompiler()
+ 
+-        tmp_fd_cpp, tmp_name_cpp = tempfile.mkstemp(prefix='g-ir-cpp-', suffix='.c')
++        tmp_fd_cpp, tmp_name_cpp = tempfile.mkstemp(prefix='g-ir-cpp-',
++                                                    suffix='.c',
++                                                    dir=os.getcwd())
+         with os.fdopen(tmp_fd_cpp, 'wb') as fp_cpp:
+             self._write_preprocess_src(fp_cpp, defines, undefs, filenames)
+ 

@@ -76,6 +76,19 @@
  
  #include <windows.h>
  
+--- origsrc/gobject-introspection-1.52.1/giscanner/ccompiler.py	2017-12-19 22:54:14.839922700 -0600
++++ src/gobject-introspection-1.52.1/giscanner/ccompiler.py	2017-12-19 23:14:22.612680700 -0600
+@@ -118,6 +118,10 @@ class CCompiler(object):
+ 
+         if self.check_is_msvc():
+             runtime_path_envvar = ['LIB', 'PATH']
++        elif os.name == 'nt' or sys.platform == 'cygwin':
++            runtime_path_envvar = ['PATH']
++            # Search the current directory first
++            args.append('-L.')
+         else:
+             runtime_path_envvar = ['LD_LIBRARY_PATH']
+             # Search the current directory first
 --- origsrc/gobject-introspection-1.46.0/giscanner/shlibs.py	2015-07-18 08:27:49.000000000 -0500
 +++ src/gobject-introspection-1.46.0/giscanner/shlibs.py	2015-11-05 19:06:13.372644100 -0600
 @@ -56,6 +56,8 @@ def _ldd_library_pattern(library_name):

@@ -2,7 +2,7 @@ inherit gnome2 python2
 
 NAME="gobject-introspection"
 VERSION=1.52.1
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
 DESCRIPTION="The goal of the project is to describe GObject APIs and collect
@@ -10,6 +10,7 @@ them in a uniform, machine readable format."
 HOMEPAGE="http://live.gnome.org/GObjectIntrospection"
 
 PATCH_URI="
+	1.52.1-bgo781525.patch
 	1.46.0-cygwin.patch
 	1.42.0-exeext.patch
 	1.36.0-tests-expected.patch
