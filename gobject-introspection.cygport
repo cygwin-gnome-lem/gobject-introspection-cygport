@@ -2,18 +2,18 @@ inherit gnome2 python2
 
 NAME="gobject-introspection"
 VERSION=1.54.1
-RELEASE=1
+RELEASE=2
 CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
 DESCRIPTION="The goal of the project is to describe GObject APIs and collect
 them in a uniform, machine readable format."
-HOMEPAGE="http://live.gnome.org/GObjectIntrospection"
+HOMEPAGE="https://gi.readthedocs.io/en/latest/"
 
 PATCH_URI="
-	1.46.0-cygwin.patch
 	1.42.0-exeext.patch
 	1.36.0-tests-expected.patch
 	1.36.0-python-libs.patch
+	1.54.1-2-cygwin.patch
 "
 
 PKG_NAMES="${NAME} libgirepository1.0_1 libgirepository1.0-devel libgirepository1.0-doc"
@@ -44,3 +44,15 @@ girepository_x11_SUMMARY="GObject Introspection data for X11 libraries"
 girepository_x11_CONTENTS="--exclude=cairo-1.0.* --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
+
+gobject_introspection_REQUIRES="libgirepository1.0-devel python27-mako"
+
+BUILD_REQUIRES=" \
+	flex \
+	gtk-doc \
+	libcairo-devel \
+	libffi-devel \
+	libglib2.0-devel \
+	python2-devel \
+	python27-mako \
+"

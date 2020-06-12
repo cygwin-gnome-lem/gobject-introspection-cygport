@@ -1,0 +1,28 @@
+From cygwin-announce-gobject-introspection-1.54.1-2 Tue Aug 04 13:56:29 2020
+From: Ken Brown <kbrown@cornell.edu>
+To: cygwin-announce@cygwin.com
+Date: Tue, 04 Aug 2020 13:56:29 -0400
+Message-Id: <20200804135629.31667-1-kbrown@cornell.edu>
+Subject: gobject-introspection 1.54.1-2
+
+The following packages have been uploaded to the Cygwin distribution:
+
+* gobject-introspection-1.54.1-2
+* libgirepository1.0_1-1.54.1-2
+* libgirepository1.0-devel-1.54.1-2
+* libgirepository1.0-doc-1.54.1-2
+* girepository-cairo1.0-1.54.1-2
+* girepository-GIRepository2.0-1.54.1-2
+* girepository-GLib2.0-1.54.1-2
+* girepository-x11-1.54.1-2
+
+The goal of the project is to describe GObject APIs and collect
+them in a uniform, machine readable format.
+
+This is a non-maintainer upload to fix the problem reported here:
+
+  https://cygwin.com/pipermail/cygwin-apps/2020-June/040176.html
+
+Thanks to Jon Turney for the fix.
+
+Ken Brown
