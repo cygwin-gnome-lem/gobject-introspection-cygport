@@ -2,7 +2,7 @@ inherit gnome2 python2
 
 NAME="gobject-introspection"
 VERSION=1.54.1
-RELEASE=2
+RELEASE=3
 CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
 DESCRIPTION="The goal of the project is to describe GObject APIs and collect
@@ -15,6 +15,8 @@ PATCH_URI="
 	1.36.0-python-libs.patch
 	1.54.1-2-cygwin.patch
 "
+
+CYGCONF_ARGS="--with-python=python2"
 
 PKG_NAMES="${NAME} libgirepository1.0_1 libgirepository1.0-devel libgirepository1.0-doc"
 gobject_introspection_CATEGORY="Devel"
