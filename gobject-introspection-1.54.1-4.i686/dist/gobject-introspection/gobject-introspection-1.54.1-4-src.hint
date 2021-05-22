@@ -1,0 +1,8 @@
+category: Devel
+build-depends: cygport  	flex 	gnome-common 	gtk-doc 	libcairo-devel 	libffi-devel 	libglib2.0-devel 	python38-devel 	python38-mako 
+sdesc: "GObject Introspection tools"
+ldesc: "The goal of the project is to describe GObject APIs and collect
+them in a uniform, machine readable format."
+skip:
+test:
+homepage: https://gi.readthedocs.io/en/latest/

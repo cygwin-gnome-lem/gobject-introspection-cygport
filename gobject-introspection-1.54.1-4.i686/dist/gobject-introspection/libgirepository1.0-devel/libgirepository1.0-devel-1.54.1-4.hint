@@ -1,0 +1,7 @@
+category: Libs
+requires: libffi-devel libgirepository1.0_1 libglib2.0-devel pkg-config girepository-GIRepository2.0
+sdesc: "GObject Introspection library (development)"
+ldesc: "The goal of the project is to describe GObject APIs and collect
+them in a uniform, machine readable format."
+external-source: gobject-introspection
+test:
