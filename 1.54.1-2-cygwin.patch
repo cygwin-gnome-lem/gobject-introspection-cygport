@@ -96,7 +96,7 @@
      if platform.system() == 'Darwin':
          pattern = "([^\s]*lib*%s[^A-Za-z0-9_-][^\s\(\)]*)"
 +    elif platform.platform().startswith('CYGWIN'):
-+        pattern = "([^\s]*cyg%s[-.0-9]*\.[^\s\(\)]*)" 
++        pattern = "([^\s]*cyg%s[-.0-9]*\.[^\s\(\)]*)"
      return re.compile(pattern % re.escape(library_name))
  
  
