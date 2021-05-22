@@ -1,8 +1,8 @@
-inherit gnome2 python2
+inherit gnome2 python3
 
 NAME="gobject-introspection"
 VERSION=1.54.1
-RELEASE=3
+RELEASE=4
 CATEGORY="Libs"
 SUMMARY="GObject Introspection tools"
 DESCRIPTION="The goal of the project is to describe GObject APIs and collect
@@ -16,7 +16,8 @@ PATCH_URI="
 	1.54.1-2-cygwin.patch
 "
 
-CYGCONF_ARGS="--with-python=python2"
+PYTHON3=python3.8
+CYGCONF_ARGS="--with-python=${PYTHON3}"
 
 PKG_NAMES="${NAME} libgirepository1.0_1 libgirepository1.0-devel libgirepository1.0-doc"
 gobject_introspection_CATEGORY="Devel"
@@ -47,14 +48,15 @@ girepository_x11_CONTENTS="--exclude=cairo-1.0.* --exclude=G*-2.0.* usr/*/gir*/"
 
 DIFF_EXCLUDES="config.py *.pc gi.types"
 
-gobject_introspection_REQUIRES="libgirepository1.0-devel python27-mako"
+gobject_introspection_REQUIRES="libgirepository1.0-devel python38-mako"
 
 BUILD_REQUIRES=" \
 	flex \
+	gnome-common \
 	gtk-doc \
 	libcairo-devel \
 	libffi-devel \
 	libglib2.0-devel \
-	python2-devel \
-	python27-mako \
+	python38-devel \
+	python38-mako \
 "
